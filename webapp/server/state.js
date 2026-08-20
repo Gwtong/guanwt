@@ -2,7 +2,7 @@
 export default {
   config: {
     whitelist: ['G001','G002','G004','G006','G008'],
-    tau: 0.8,
+    tau: 0.85,
     t_silence: 60,
     t_max: 300,
     t_lookback: 600,

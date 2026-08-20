@@ -10,6 +10,13 @@
 
 ## [2026-08-20] 同步（受控）
 - 来源：SSOT.md §2 策略参数当前值
+- webapp/server/state.js · tau: `0.8` → `0.85`
+- schema/config.md · tau: `0.80` → `0.85`
+- 提交：本次同步（git log 最新一条即对应）
+
+
+## [2026-08-20] 同步（受控）
+- 来源：SSOT.md §2 策略参数当前值
 - schema/config.md · tau: `0.85` → `0.80`
 - 提交：本次同步（git log 最新一条即对应）
 

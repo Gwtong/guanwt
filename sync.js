@@ -22,7 +22,8 @@ function parseSSOT() {
   const map = {};
   const re = /^\|\s*`(\w+)`\s*\|\s*`([^`]+)`\s*\|/;
   for (const line of sec.split('\n')) {
-    const m = line.match(re);
+    const clean = line.replace(/[\x00-\x1f\x7f]/g, ''); // 剥掉隐形控制字符，避免漏同步
+    const m = clean.match(re);
     if (m && SYNC_FIELDS.includes(m[1])) map[m[1]] = m[2].trim();
   }
   return map;
