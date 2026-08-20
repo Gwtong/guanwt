@@ -1,4 +1,5 @@
 node_modules/
 .npm-cache/
 debug*.js
+push_to_github.bat
 
