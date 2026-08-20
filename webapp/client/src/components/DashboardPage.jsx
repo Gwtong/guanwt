@@ -40,10 +40,10 @@ export default function DashboardPage({ tick }) {
           <div className="desc">从消息接入到响应执行的全链路转化。</div>
           {[
             ['消息接入', c.intake, 100, ''],
-            ['通过前置过滤', c.intake - c.filtered, c.intake ? ((c.intake - c.filtered) / c.intake * 100) : 0, '#7A93A8'],
-            ['BERT 通过', c.bert_pass, c.intake ? (c.bert_pass / c.intake * 100) : 0, '#7A93A8'],
-            ['解析完成', c.parsed, c.intake ? (c.parsed / c.intake * 100) : 0, '#7A93A8'],
-            ['响应执行', c.responded, c.intake ? (c.responded / c.intake * 100) : 0, '#B3543F'],
+            ['通过前置过滤', c.intake - c.filtered, c.intake ? ((c.intake - c.filtered) / c.intake * 100) : 0, 'var(--accent)'],
+            ['BERT 通过', c.bert_pass, c.intake ? (c.bert_pass / c.intake * 100) : 0, 'var(--accent)'],
+            ['解析完成', c.parsed, c.intake ? (c.parsed / c.intake * 100) : 0, 'var(--accent)'],
+            ['响应执行', c.responded, c.intake ? (c.responded / c.intake * 100) : 0, 'var(--up)'],
           ].map((r, i) => (
             <div key={i} className="hbar">
               <span>{r[0]}</span>

@@ -29,8 +29,8 @@ export default function Sidebar({ page, setPage, replay, onReplayAction, config 
         })}
       </nav>
       <div className="replay-ctrl">
-        <div style={{ color: '#8B97A5', fontSize: '11.5px', marginBottom: 4 }}>消息回放</div>
-        <div style={{ color: '#fff', fontSize: '12px' }}>
+        <div style={{ color: 'var(--faint)', fontSize: '11px', letterSpacing: '2px', marginBottom: 4 }}>消息回放</div>
+        <div style={{ color: 'var(--ink)', fontSize: '12px', fontVariantNumeric: 'tabular-nums' }}>
           {replay.cursor}/{replay.total} 条 · {replay.progress}%
         </div>
         <div className="btns">
