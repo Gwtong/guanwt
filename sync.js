@@ -10,10 +10,10 @@ const ROOT = __dirname;
 const SSOT = path.join(ROOT, 'SSOT.md');
 const STATE = path.join(ROOT, 'webapp/server/state.js');
 const SCHEMA = path.join(ROOT, 'schema/config.md');
-const CHANGE = path.join(ROOT, 'CHANGELOG.md');
+const CHANGELOG = path.join(ROOT, 'CHANGELOG.md');
 
 // 只同步纯值字段（避开含斜杠说明的 ai_mode / 空值的 key 类）
-const SYNC_FIELDS = ['whitelist','tau','t_silence','t_max','t_lookback','n_freq','at_switch','dedup_window'];
+const SYNC_FIELDS = ['whitelist', 'tau', 't_silence', 't_max', 't_lookback', 'n_freq', 'at_switch', 'dedup_window'];
 
 // 读 SSOT §2 参数表 → {field: rawValue}
 function parseSSOT() {
@@ -43,48 +43,53 @@ function schemaVal(raw) {
   return '`' + raw.trim().replace(/'/g, '') + '`';
 }
 
+// 逐行解析 state.js，替换 config 块内字段值（坏数据也能自愈）
 function syncState(SSOTmap) {
-  let src = fs.readFileSync(STATE, 'utf8');
+  const lines = fs.readFileSync(STATE, 'utf8').split('\n');
   const changes = [];
   for (const f of SYNC_FIELDS) {
     if (!(f in SSOTmap)) continue;
     const target = jsVal(f, SSOTmap[f]);
-    const re = new RegExp('(\\b' + f + ':\\s*)[^,\\n]+');
-    const cur = src.match(re);
-    if (!cur) continue;
-    const oldRaw = cur[0].replace(new RegExp('\\b' + f + ':\\s*'), '').trim();
-    if (oldRaw === target) continue;
-    src = src.replace(re, '$1' + target);
-    changes.push({ file: 'webapp/server/state.js', field: f, from: oldRaw, to: target });
+    for (let i = 0; i < lines.length; i++) {
+      const m = lines[i].match(new RegExp('^\\s*' + f + ':\\s*(.+?)(?:,\\s*)?$'));
+      if (!m) continue;
+      const oldRaw = m[1].trim();
+      if (oldRaw === target) break;
+      lines[i] = lines[i].replace(new RegExp('(^\\s*' + f + ':\\s*)(.+?)(?:,\\s*)?$'), '$1' + target + ',');
+      changes.push({ file: 'webapp/server/state.js', field: f, from: oldRaw, to: target });
+      break;
+    }
   }
-  if (changes.length) fs.writeFileSync(STATE, src);
+  if (changes.length) fs.writeFileSync(STATE, lines.join('\n'));
   return changes;
 }
 
+// 替换 schema/config.md 表格里 field 行的第三个反引号单元格
 function syncSchema(SSOTmap) {
-  let src = fs.readFileSync(SCHEMA, 'utf8');
+  const lines = fs.readFileSync(SCHEMA, 'utf8').split('\n');
   const changes = [];
   for (const f of SYNC_FIELDS) {
     if (!(f in SSOTmap)) continue;
     const target = schemaVal(SSOTmap[f]);
-    const re = new RegExp('(\\}\\s*\\|[^|]*\\|\\s*)' + '`' + '[^`]*' + '`');
-    // 定位含 `field` 的行，替换其第三个反引号单元格
-    const lineRe = new RegExp('^\\|\\s*`' + f + '`\\s*\\|[^|]*\\|\\s*`[^`]*`');
-    const m = src.match(lineRe);
-    if (!m) continue;
-    const oldCell = m[0].match(/`([^`]*)`\s*$/);
-    if (oldCell && '`' + oldCell[1] + '`' === target) continue;
-    src = src.replace(lineRe, m[0].replace(/`[^`]*`\s*$/, target));
-    changes.push({ file: 'schema/config.md', field: f, from: oldCell ? oldCell[1] : '?', to: SSOTmap[f].replace(/'/g,'') });
+    for (let i = 0; i < lines.length; i++) {
+      const lineRe = new RegExp('^\\|\\s*`' + '`' + f + '`' + '\\s*\\|[^|]*\\|\\s*`[^`]*`');
+      const m = lines[i].match(lineRe);
+      if (!m) continue;
+      const oldCell = m[0].match(/`([^`]*)`\s*$/);
+      if (oldCell && '`' + oldCell[1] + '`' === target) break;
+      lines[i] = lines[i].replace(/`[^`]*`\s*$/, target);
+      changes.push({ file: 'schema/config.md', field: f, from: oldCell ? oldCell[1] : '?', to: SSOTmap[f].replace(/'/g, '') });
+      break;
+    }
   }
-  if (changes.length) fs.writeFileSync(SCHEMA, src);
+  if (changes.length) fs.writeFileSync(SCHEMA, lines.join('\n'));
   return changes;
 }
 
-function appendChangelog(allChanges, hash) {
+function appendChangelog(allChanges) {
   const date = new Date().toISOString().slice(0, 10);
   const lines = allChanges.map(c => `- ${c.file} · ${c.field}: \`${c.from}\` → \`${c.to}\``).join('\n');
-  const entry = `\n## [${date}] 同步（受控）\n- 来源：SSOT.md §2 策略参数当前值\n${lines}\n- 提交：${hash}\n`;
+  const entry = `\n## [${date}] 同步（受控）\n- 来源：SSOT.md §2 策略参数当前值\n${lines}\n- 提交：本次同步（git log 最新一条即对应）\n`;
   fs.appendFileSync(CHANGELOG, entry);
 }
 
@@ -102,12 +107,10 @@ if (!all.length) {
 console.log('同步明细（改了这些值）：');
 all.forEach(c => console.log(`  ${c.file}  ${c.field}: ${c.from} → ${c.to}`));
 
+appendChangelog(all);
 execSync('git add -A', { cwd: ROOT, stdio: 'ignore' });
-const out = execSync('git commit -q -m "sync: ' + all.map(c => c.field).join(',') + '"', { cwd: ROOT, encoding: 'utf8' });
+execSync('git -c user.email=pm@local -c user.name=guanPM commit -q -m "sync: ' + all.map(c => c.field).join(',') + '"', { cwd: ROOT, stdio: 'ignore' });
 const hash = execSync('git rev-parse --short HEAD', { cwd: ROOT, encoding: 'utf8' }).trim();
-appendChangelog(all, hash);
-execSync('git add -A', { cwd: ROOT, stdio: 'ignore' });
-execSync('git commit -q --amend -m "sync: ' + all.map(c => c.field).join(',') + '"', { cwd: ROOT, stdio: 'ignore' });
 
 console.log('\n✓ 已同步并提交（' + hash + '）。CHANGELOG 已追加一条记录。');
 console.log('  想退回这一步：git revert ' + hash + '  或  git checkout ' + hash + '^ -- .');
