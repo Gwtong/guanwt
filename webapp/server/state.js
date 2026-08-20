@@ -1,7 +1,7 @@
 // 运行时状态 —— 所有运行时数据挂在这里，重启后重置
 export default {
   config: {
-    whitelist: ['G001','G002','G004','G006','G008'],'G002','G004','G006','G008'],
+    whitelist: ['G001','G002','G004','G006','G008'],
     tau: 0.85,
     t_silence: 60,
     t_max: 300,
