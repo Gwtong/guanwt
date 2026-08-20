@@ -21,6 +21,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// 健康检查（Railway 等平台用它判断服务是否存活）
+app.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
+
 // ============ 消息回放 ============
 app.post('/api/replay/start', (req, res) => {
   const speed = req.body?.speed || 1;
