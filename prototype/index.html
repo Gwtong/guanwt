@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>群内需求快速响应 · 试点控制台（原型 v0.1）</title>
+<style>
+  :root{
+    --bg:#F6F6F3; --card:#FFFFFF; --line:#E8E8E3; --line2:#DEDEd8;
+    --ink:#1F2733; --sub:#6B7280; --faint:#9CA3AF;
+    --exp:#3E5C76; --exp-bg:#EDF1F5;      /* 实验组/主色：低饱和蓝 */
+    --ctl:#A8A29E; --ctl-bg:#F2F1EE;      /* 对照组：暖灰 */
+    --up:#B3543F;  --up-bg:#F7EDE9;       /* 提升红（涨=红） */
+    --ok:#4E7A5A;  --ok-bg:#EBF2ED;       /* 通过绿（低饱和） */
+    --warn:#9A7B3F; --warn-bg:#F6F0E3;
+    --r:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);
+    font-family:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+    font-size:14px;line-height:1.6}
+  ::selection{background:#DCE5EC}
+
+  /* ===== 顶栏 ===== */
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .topbar-in{max-width:1180px;margin:0 auto;padding:0 24px;display:flex;
+    align-items:center;gap:28px;height:60px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;white-space:nowrap}
+  .brand .dot{width:10px;height:10px;border-radius:3px;background:var(--exp);flex:none}
+  .brand small{font-weight:400;color:var(--sub);font-size:12px;margin-left:2px}
+  .tabs{display:flex;gap:4px;height:100%;margin-left:auto}
+  .tab{border:none;background:none;cursor:pointer;padding:0 16px;font-size:14px;
+    color:var(--sub);border-bottom:2px solid transparent;height:100%;font-family:inherit}
+  .tab:hover{color:var(--ink)}
+  .tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--exp)}
+  .proto-flag{font-size:11px;color:var(--warn);background:var(--warn-bg);
+    border:1px solid #E8DCC2;border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+  main{max-width:1180px;margin:0 auto;padding:28px 24px 64px}
+  .view{display:none}
+  .view.on{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  /* ===== 通用组件 ===== */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    padding:20px 22px;box-shadow:0 1px 2px rgba(31,39,51,.03)}
+  .card h3{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .card .desc{color:var(--sub);font-size:12.5px;margin-bottom:14px}
+  .fchip{font-size:10.5px;font-weight:600;color:var(--exp);background:var(--exp-bg);
+    border:1px solid #D7E0E9;border-radius:4px;padding:1px 6px;letter-spacing:.3px;cursor:default}
+  .grid{display:grid;gap:16px}
+  .mt16{margin-top:16px}
+
+  /* KPI */
+  .kpis{grid-template-columns:repeat(6,1fr)}
+  .kpi .label{font-size:12px;color:var(--sub)}
+  .kpi .val{font-size:26px;font-weight:700;letter-spacing:-.5px;margin:2px 0}
+  .kpi .foot{font-size:11.5px;color:var(--faint)}
+  .kpi .delta{font-weight:600}
+  .up{color:var(--up)} .ok{color:var(--ok)}
+
+  /* 表格 */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{font-size:11.5px;color:var(--sub);font-weight:500;text-align:left;
+    padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:9px 10px;border-bottom:1px solid #F0F0EC;vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#FAFAF7}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* 标签 */
+  .tag{display:inline-block;font-size:11px;border-radius:4px;padding:1px 8px;line-height:1.7;white-space:nowrap}
+  .t-exp{color:var(--exp);background:var(--exp-bg)} .t-ctl{color:#78716C;background:var(--ctl-bg)}
+  .t-up{color:var(--up);background:var(--up-bg)} .t-ok{color:var(--ok);background:var(--ok-bg)}
+  .t-warn{color:var(--warn);background:var(--warn-bg)}
+  .t-dim{color:var(--faint);background:#F4F4F1}
+
+  /* 按钮 */
+  .btn{font-family:inherit;font-size:12.5px;border-radius:8px;cursor:pointer;
+    padding:6px 14px;border:1px solid var(--line2);background:#fff;color:var(--ink);
+    transition:all .15s}
+  .btn:hover{border-color:#C9C9C2;background:#FAFAF7}
+  .btn-pri{background:var(--exp);border-color:var(--exp);color:#fff}
+  .btn-pri:hover{background:#35506A;border-color:#35506A}
+  .btn-sm{padding:3px 10px;font-size:12px}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+
+  /* 选择器 */
+  select{font-family:inherit;font-size:12.5px;padding:5px 8px;border:1px solid var(--line2);
+    border-radius:8px;background:#fff;color:var(--ink)}
+
+  /* ===== 工作台 ===== */
+  .bench{grid-template-columns:340px 1fr 300px;align-items:start}
+  @media (max-width:1080px){.bench,.kpis{grid-template-columns:1fr}}
+  .stream{max-height:560px;overflow-y:auto;padding-right:4px}
+  .msg{display:flex;gap:10px;padding:10px 8px;border-bottom:1px solid #F0F0EC;border-radius:8px}
+  .msg.pick{background:var(--exp-bg);outline:1px solid #D7E0E9}
+  .msg.dim{opacity:.55}
+  .avatar{width:34px;height:34px;border-radius:8px;flex:none;display:flex;align-items:center;
+    justify-content:center;font-size:13px;font-weight:600;color:#fff}
+  .msg .who{font-size:12px;color:var(--sub)}
+  .msg .txt{font-size:13px;margin-top:1px;word-break:break-all}
+  .msg .meta{margin-top:4px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .live-dot{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block;
+    margin-right:6px;animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+  /* 管线 */
+  .pipe{display:flex;gap:6px;align-items:stretch;margin-bottom:16px;flex-wrap:wrap}
+  .pstep{flex:1;min-width:110px;background:#FAFAF7;border:1px solid var(--line);
+    border-radius:10px;padding:10px 12px;position:relative}
+  .pstep .pl{font-size:11px;color:var(--sub)}
+  .pstep .pv{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+  .pstep .pf{position:absolute;top:8px;right:8px}
+  .parr{align-self:center;color:var(--faint);font-size:15px}
+
+  .detail-empty{color:var(--faint);font-size:13px;padding:40px 0;text-align:center}
+  .confbar{height:6px;background:#EFEFEB;border-radius:3px;overflow:hidden;margin:6px 0 2px}
+  .confbar i{display:block;height:100%;border-radius:3px;background:var(--exp)}
+  .sku{display:flex;gap:12px;align-items:center;border:1px solid var(--line);
+    border-radius:10px;padding:10px 12px;margin-top:8px;cursor:pointer;transition:all .15s}
+  .sku:hover{border-color:#C9D4DE}
+  .sku.sel{border-color:var(--exp);background:var(--exp-bg)}
+  .sku .thumb{width:44px;height:44px;border-radius:8px;flex:none;display:flex;
+    align-items:center;justify-content:center;font-size:19px;background:#F1F1EC}
+  .sku .nm{font-size:13px;font-weight:500}
+  .sku .pr{font-size:15px;font-weight:700;color:var(--up);font-variant-numeric:tabular-nums}
+  .sku .pr small{font-size:11px;font-weight:400;color:var(--sub)}
+
+  /* 微信卡片预览 */
+  .wxcard{background:#fff;border:1px solid var(--line2);border-radius:12px;overflow:hidden;
+    box-shadow:0 4px 14px rgba(31,39,51,.08)}
+  .wxcard .cover{height:110px;display:flex;align-items:center;justify-content:center;
+    font-size:34px;background:linear-gradient(135deg,#F2F2EC,#E9E9E2)}
+  .wxcard .body{padding:12px 14px}
+  .wxcard .t{font-size:14px;font-weight:600}
+  .wxcard .s{font-size:12px;color:var(--sub);margin-top:2px}
+  .wxcard .row{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+  .wxcard .price{color:var(--up);font-weight:700;font-size:18px;font-variant-numeric:tabular-nums}
+  .wxcard .cta{background:#07C160;color:#fff;font-size:12px;border-radius:6px;padding:6px 14px}
+  .wxsrc{font-size:11px;color:var(--faint);margin-top:8px;text-align:center}
+
+  /* 规则面板 */
+  .rule{display:flex;justify-content:space-between;align-items:center;padding:9px 0;
+    border-bottom:1px dashed #EAEAE5;font-size:13px}
+  .rule:last-child{border-bottom:none}
+  .rule .rv{color:var(--sub);font-size:12.5px}
+  input[type=range]{width:150px;accent-color:var(--exp)}
+  .switch{position:relative;width:36px;height:20px;flex:none;cursor:pointer}
+  .switch input{opacity:0;width:0;height:0}
+  .sl{position:absolute;inset:0;background:#D8D8D2;border-radius:10px;transition:.2s}
+  .sl:before{content:"";position:absolute;width:16px;height:16px;border-radius:50%;
+    background:#fff;top:2px;left:2px;transition:.2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+  .switch input:checked + .sl{background:var(--exp)}
+  .switch input:checked + .sl:before{transform:translateX(16px)}
+
+  /* 图表 */
+  .chart-wrap svg{display:block;width:100%;height:auto}
+  .legend{display:flex;gap:16px;font-size:12px;color:var(--sub);margin-top:8px}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+  .hbar{display:grid;grid-template-columns:64px 1fr 90px;gap:10px;align-items:center;
+    font-size:12.5px;padding:7px 0}
+  .hbar .tr{height:10px;background:#EFEFEB;border-radius:5px;overflow:hidden}
+  .hbar .tr i{display:block;height:100%;border-radius:5px;background:var(--exp)}
+  .hbar .vv{text-align:right;font-variant-numeric:tabular-nums;color:var(--sub)}
+
+  .note{font-size:12px;color:var(--faint);border-top:1px dashed var(--line);
+    margin-top:14px;padding-top:10px}
+  footer{max-width:1180px;margin:0 auto;padding:0 24px 40px;color:var(--faint);
+    font-size:12px;line-height:1.9}
+  footer b{color:var(--sub)}
+
+  /* toast */
+  #toast{position:fixed;left:50%;bottom:32px;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;font-size:13px;border-radius:10px;padding:10px 20px;
+    opacity:0;pointer-events:none;transition:all .25s;z-index:99;box-shadow:0 6px 20px rgba(0,0,0,.2)}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  .two{grid-template-columns:1.4fr 1fr}
+  .three{grid-template-columns:repeat(3,1fr)}
+  @media (max-width:900px){.two,.three{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="topbar-in">
+  <div class="brand"><span class="dot"></span>群内需求快速响应 · 试点控制台
+    <small>JD-Community-QuickResponse</small></div>
+  <span class="proto-flag">原型 v0.1 · 需求确认工具 · 数据均为演示</span>
+  <nav class="tabs">
+    <button class="tab on" data-v="overview">总览</button>
+    <button class="tab" data-v="groups">试点群管理</button>
+    <button class="tab" data-v="live">实时响应工作台</button>
+    <button class="tab" data-v="metric">指标与显著性</button>
+  </nav>
+</div></div>
+
+<main>
+
+<!-- ============ 视图1：总览 ============ -->
+<section class="view on" id="view-overview">
+  <div class="grid kpis">
+    <div class="card kpi"><div class="label">试点群数</div><div class="val num">1,200</div>
+      <div class="foot">实验 600 / 对照 600</div></div>
+    <div class="card kpi"><div class="label">实验组 · 周活跃率</div><div class="val num">8.91<span style="font-size:14px">%</span></div>
+      <div class="foot delta up">▲ 较上周 +0.13pp</div></div>
+    <div class="card kpi"><div class="label">对照组 · 周活跃率</div><div class="val num">7.50<span style="font-size:14px">%</span></div>
+      <div class="foot">基线 7.57%（2025-09）</div></div>
+    <div class="card kpi"><div class="label">相对提升</div><div class="val num up">+18.8%</div>
+      <div class="foot delta ok">p = 0.008 · 统计显著 ✓</div></div>
+    <div class="card kpi"><div class="label">本周触发响应</div><div class="val num">3,842</div>
+      <div class="foot">需求信号 → 定向卡片</div></div>
+    <div class="card kpi"><div class="label">响应卡片点击率</div><div class="val num">21.3<span style="font-size:14px">%</span></div>
+      <div class="foot">常规推送 9.8%</div></div>
+  </div>
+
+  <div class="grid two mt16">
+    <div class="card chart-wrap">
+      <h3>群点击活跃率 · 周趋势 <span class="fchip">F-08</span></h3>
+      <div class="desc">北极星指标 = 群营销资源点击量 / 群人数。试点自 W5 启动，实验组（蓝）vs 对照组（灰）。</div>
+      <div id="chart-trend"></div>
+      <div class="legend">
+        <span><i style="background:var(--exp)"></i>实验组（快速响应开启）</span>
+        <span><i style="background:var(--ctl)"></i>对照组（常规 T+1 排期推送）</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3>试点群结构 <span class="fchip">F-01</span></h3>
+      <div class="desc">圈选规则：仅运营群（排除 7 日内新群与死群），按活跃分层 × 用户类型分层随机 1:1 分组。</div>
+      <div id="dist-activity"></div>
+      <div class="note" style="border-top:none;margin-top:6px">用户类型标签（潜水用户按 40% 折算计入新人）：</div>
+      <div id="dist-user"></div>
+    </div>
+  </div>
+
+  <div class="card mt16">
+    <h3>响应漏斗（本周汇总）<span class="fchip">F-02 → F-06</span></h3>
+    <div class="desc">从消息接入到定向触发的全链路转化，验证「低信噪比」过滤的实际效率。</div>
+    <div id="funnel"></div>
+  </div>
+</section>
+
+<!-- ============ 视图2：试点群管理 ============ -->
+<section class="view" id="view-groups">
+  <div class="card">
+    <h3>试点群清单 <span class="fchip">F-01</span></h3>
+    <div class="desc">圈选条件由运营在 SCRM 三层分类标签之上叠加；分组可手动调整，系统按分层保持 1:1 平衡。</div>
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+      <select id="flt-layer"><option value="">活跃分层：全部</option><option>成长群</option><option>活跃群</option><option>衰退群</option></select>
+      <select id="flt-user"><option value="">用户类型：全部</option><option>新用户群</option><option>成熟用户群</option><option>召回用户群</option></select>
+      <select id="flt-arm"><option value="">分组：全部</option><option>实验组</option><option>对照组</option></select>
+      <span style="margin-left:auto;font-size:12.5px;color:var(--sub)" id="gstat"></span>
+    </div>
+    <div style="overflow-x:auto">
+    <table id="gtable">
+      <thead><tr><th>群 ID</th><th>群名称</th><th class="num">群人数</th><th>活跃分层</th>
+        <th>用户类型</th><th>周点击活跃率</th><th>分组</th><th style="text-align:right">操作</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    </div>
+    <div class="note">二级标签（省份 / 关系 / 价格带 / 活跃时段 / 群规模）预留为下一版筛选项 —— 本版不做（见 BRD Out of Scope）。</div>
+  </div>
+</section>
+
+<!-- ============ 视图3：实时响应工作台 ============ -->
+<section class="view" id="view-live">
+  <div class="grid bench">
+    <!-- 左：消息流 -->
+    <div class="card">
+      <h3><span class="live-dot"></span>群消息流（试点群 #G20481）<span class="fchip">F-02</span></h3>
+      <div class="desc">复用机器人回传链路实时接入；灰显条目已被信噪比过滤拦截。</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <button class="btn btn-sm" id="btn-stream">⏸ 暂停接入</button>
+        <button class="btn btn-sm" id="btn-inject">＋ 注入一条需求信号</button>
+      </div>
+      <div class="stream" id="stream"></div>
+    </div>
+
+    <!-- 中：管线 + 识别详情 -->
+    <div class="card">
+      <h3>响应管线 · 今日累计（该群）</h3>
+      <div class="pipe" id="pipe"></div>
+
+      <h3 style="margin-top:6px">意图识别与内容匹配 <span class="fchip">F-04</span><span class="fchip">F-05</span></h3>
+      <div class="desc">点击左侧「需求信号」消息查看识别详情；达到置信阈值的信号标记为「建议自动触发」。</div>
+      <div id="detail"><div class="detail-empty">← 在左侧消息流中选择一条带「需求信号」标记的消息</div></div>
+    </div>
+
+    <!-- 右：卡片预览 + 规则 -->
+    <div style="display:grid;gap:16px">
+      <div class="card">
+        <h3>营销卡片预览 <span class="fchip">F-06</span></h3>
+        <div class="desc">触发后由机器人以群主名义发送，样式与常规推送卡片一致。</div>
+        <div class="wxcard">
+          <div class="cover" id="wx-cover">📦</div>
+          <div class="body">
+            <div class="t" id="wx-title">等待触发…</div>
+            <div class="s" id="wx-sub">选择左侧识别结果并点击「触发推送」</div>
+            <div class="row"><span class="price" id="wx-price">--</span>
+              <span class="cta">立即购买</span></div>
+          </div>
+        </div>
+        <div class="wxsrc">京东小程序 · CPS 推广链接（携带群 ID 后缀）</div>
+      </div>
+
+      <div class="card">
+        <h3>感知与隐私保护 <span class="fchip">F-07</span></h3>
+        <div class="desc">所有保护规则对群成员不可见，仅作用于触发侧。</div>
+        <div class="rule"><span>意图置信阈值</span>
+          <span class="rv"><input type="range" id="th" min="60" max="95" value="85" step="5">
+          <b id="thv" style="color:var(--ink)">0.85</b></span></div>
+        <div class="rule"><span>单群单日响应上限</span><span class="rv">3 次（总推送 ≤ 12 条/日内）</span></div>
+        <div class="rule"><span>免打扰时段</span><span class="rv">22:00 – 08:00</span></div>
+        <div class="rule"><span>仅响应明确需求表述</span>
+          <span class="rv"><label class="switch"><input type="checkbox" checked><span class="sl"></span></label></span></div>
+        <div class="rule"><span>不在群内展示"分析中"提示</span>
+          <span class="rv"><label class="switch"><input type="checkbox" checked><span class="sl"></span></label></span></div>
+        <div class="note">阈值调整实时生效：低于阈值的需求信号仅进入「人工待审」。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 视图4：指标与显著性 ============ -->
+<section class="view" id="view-metric">
+  <div class="grid three">
+    <div class="card">
+      <h3>显著性检验 <span class="fchip">F-08</span></h3>
+      <div class="desc">群级聚合双样本 t 检验 · 观测窗口 W5–W12（8 周）</div>
+      <div style="font-size:34px;font-weight:700" class="up num">+1.41<span style="font-size:15px">pp</span></div>
+      <div style="color:var(--sub);font-size:12.5px;margin-bottom:12px">实验组 8.91% vs 对照组 7.50%（相对 +18.8%）</div>
+      <table>
+        <tr><td style="color:var(--sub)">p 值（双尾）</td><td class="num" style="text-align:right;font-weight:600">0.008</td></tr>
+        <tr><td style="color:var(--sub)">95% 置信区间</td><td class="num" style="text-align:right">[+0.62, +2.20] pp</td></tr>
+        <tr><td style="color:var(--sub)">检验结论</td><td style="text-align:right"><span class="tag t-up">统计显著 ✓</span></td></tr>
+        <tr><td style="color:var(--sub)">结论效力</td><td style="text-align:right">n=600/组，α=0.05</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>护栏指标</h3>
+      <div class="desc">显著性提升不得以伤害群生态为代价。</div>
+      <table>
+        <tr><td style="color:var(--sub)">试点群月退群率</td><td style="text-align:right"><span class="tag t-ok">1.2% ≈ 对照 1.1%</span></td></tr>
+        <tr><td style="color:var(--sub)">群负反馈（投诉/屏蔽）</td><td style="text-align:right"><span class="tag t-ok">无显著上升</span></td></tr>
+        <tr><td style="color:var(--sub)">错发卡片（人工抽检）</td><td style="text-align:right"><span class="tag t-ok">1.8% ＜ 3% 红线</span></td></tr>
+        <tr><td style="color:var(--sub)">日均推送条数</td><td style="text-align:right" class="num">9.4 / 12 上限</td></tr>
+      </table>
+      <div class="note">错发率 = 意图识别错误导致的无关推送占比，抽检 2,000 条。</div>
+    </div>
+    <div class="card">
+      <h3>投入产出</h3>
+      <div class="desc">增量订单口径 · 对照组差分估计</div>
+      <table>
+        <tr><td style="color:var(--sub)">响应带来增量订单</td><td style="text-align:right" class="num">≈ 412 单/周</td></tr>
+        <tr><td style="color:var(--sub)">客单价</td><td style="text-align:right" class="num">¥ 39.7</td></tr>
+        <tr><td style="color:var(--sub)">增量 GMV（年化）</td><td style="text-align:right" class="num">¥ 85.1 万</td></tr>
+        <tr><td style="color:var(--sub)">试点推理成本（月）</td><td style="text-align:right" class="num">¥ 1.6 万</td></tr>
+      </table>
+      <div class="note">全量机器人成本锚点：400 元/月/个 · 1 机服务 10 群 · 年成本约 1.1 亿（社群年产值 118 亿）。</div>
+    </div>
+  </div>
+
+  <div class="grid two mt16">
+    <div class="card">
+      <h3>分层提升拆解（pp）<span class="fchip">F-08</span></h3>
+      <div class="desc">不同活跃分层对快速响应的敏感度差异。</div>
+      <div id="layer-uplift"></div>
+      <div class="note">衰退群受益最大：常规 T+1 排期对该类群内容匹配最差，实时响应修复最明显。</div>
+    </div>
+    <div class="card">
+      <h3>评估口径说明</h3>
+      <div class="desc">结论可信的前提是口径被锁定。</div>
+      <table>
+        <tr><td style="color:var(--sub)">指标定义</td><td>群点击活跃率 = 周内营销资源点击量 ÷ 群人数</td></tr>
+        <tr><td style="color:var(--sub)">聚合单位</td><td>群级（非消息级 / 非人级）</td></tr>
+        <tr><td style="color:var(--sub)">检验方法</td><td>双样本 t 检验，Welch 校正</td></tr>
+        <tr><td style="color:var(--sub)"> novelty 剔除</td><td>试点首周数据不计入（新奇特效应）</td></tr>
+        <tr><td style="color:var(--sub)">数据来源</td><td>SCRM T+1 统计 + 点击埋点回传</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <b>引用链</b>：agents.md（项目宪法）→ BRD.md（R-xx / F-01…F-08）→ 本原型 prototype/index.html（流程③，需求确认工具）→ 下一步：④ schema · ⑤ deps · ⑥ techstack。<br>
+  本页所有数据均为演示用 mock 数据，用于确认需求边界，不代表真实业务表现。定稿后本原型使命即完成。
+</footer>
+
+<div id="toast"></div>
+
+<script>
+/* ================= 基础交互 ================= */
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+$$('.tab').forEach(t=>t.onclick=()=>{
+  $$('.tab').forEach(x=>x.classList.remove('on')); t.classList.add('on');
+  $$('.view').forEach(v=>v.classList.remove('on')); $('#view-'+t.dataset.v).classList.add('on');
+});
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');
+  clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2200)}
+
+/* ================= 图表 ================= */
+function lineChart(el,ys){
+  const W=680,H=300,P={l:42,r:16,t:18,b:34};
+  const n=ys.weeks.length, all=[...ys.ctl,...ys.exp.filter(v=>v!=null)];
+  const lo=Math.floor((Math.min(...all)-.2)*10)/10, hi=Math.ceil((Math.max(...all)+.2)*10)/10;
+  const X=i=>P.l+i*(W-P.l-P.r)/(n-1), Y=v=>P.t+(hi-v)*(H-P.t-P.b)/(hi-lo);
+  let g='';for(let v=lo;v<=hi+1e-9;v+=.5){
+    g+=`<line x1="${P.l}" y1="${Y(v)}" x2="${W-P.r}" y2="${Y(v)}" stroke="#EFEFEB"/>
+        <text x="${P.l-8}" y="${Y(v)+4}" font-size="10" fill="#9CA3AF" text-anchor="end">${v.toFixed(1)}%</text>`;}
+  ys.weeks.forEach((w,i)=>{if(i%1==0)g+=`<text x="${X(i)}" y="${H-10}" font-size="10" fill="#9CA3AF" text-anchor="middle">${w}</text>`});
+  const start=ys.exp.findIndex(v=>v!=null);
+  g+=`<rect x="${X(start)-P.l/(n-1)}" y="${P.t}" width="${W-P.r-X(start)+8}" height="${H-P.t-P.b}" fill="#3E5C76" opacity="0.05"/>`;
+  g+=`<line x1="${X(start)}" y1="${P.t}" x2="${X(start)}" y2="${H-P.b}" stroke="#3E5C76" stroke-dasharray="3 3" opacity=".4"/>
+      <text x="${X(start)+6}" y="${P.t+12}" font-size="10.5" fill="#3E5C76">W5 试点启动</text>`;
+  const path=a=>a.map((v,i)=>v==null?'':(i&&a[i-1]!=null?'L':'M')+X(i)+' '+Y(v)).join(' ');
+  g+=`<path d="${path(ys.ctl)}" fill="none" stroke="#A8A29E" stroke-width="2"/>`;
+  g+=`<path d="${path(ys.exp)}" fill="none" stroke="#3E5C76" stroke-width="2.5"/>`;
+  const li=ys.exp.length-1;
+  g+=`<circle cx="${X(li)}" cy="${Y(ys.exp[li])}" r="4" fill="#3E5C76"/>
+      <text x="${X(li)-8}" y="${Y(ys.exp[li])-10}" font-size="11" font-weight="600" fill="#3E5C76" text-anchor="end">${ys.exp[li].toFixed(2)}%</text>
+      <circle cx="${X(li)}" cy="${Y(ys.ctl[li])}" r="3.5" fill="#A8A29E"/>
+      <text x="${X(li)-8}" y="${Y(ys.ctl[li])+18}" font-size="11" fill="#78716C" text-anchor="end">${ys.ctl[li].toFixed(2)}%</text>`;
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}">${g}</svg>`;
+}
+function hbars(el,rows,unit=''){
+  el.innerHTML=rows.map(r=>`<div class="hbar"><span>${r[0]}</span>
+    <div class="tr"><i style="width:${r[2]}%;${r[3]||''}"></i></div>
+    <span class="vv">${r[1]}${unit}</span></div>`).join('');
+}
+lineChart($('#chart-trend'),{
+  weeks:['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12'],
+  ctl:[7.44,7.49,7.46,7.52,7.48,7.53,7.49,7.55,7.51,7.47,7.52,7.50],
+  exp:[null,null,null,null,7.55,7.94,8.18,8.37,8.55,8.71,8.78,8.91]
+});
+hbars($('#dist-activity'),[
+  ['活跃群',480,100,''],['成长群',420,87.5,'background:#7A93A8'],
+  ['衰退群',300,62.5,'background:#B5AFA8']
+],' 群');
+hbars($('#dist-user'),[
+  ['新用户群',532,100,'background:#7A93A8'],['成熟用户群',436,82,''],['召回用户群',232,43.6,'background:#B5AFA8']
+],' 群');
+hbars($('#funnel'),[
+  ['消息接入',186,400,100,''],
+  ['通过信噪比过滤',124,800,67.1,'background:#7A93A8'],
+  ['识别为需求信号',41,600,22.4,'background:#7A93A8'],
+  ['匹配到商品（≥0.85）',38,420,20.7,'background:#7A93A8'],
+  ['触发定向响应',3,842,2.1,'background:#B3543F']
+]);
+hbars($('#layer-uplift'),[
+  ['衰退群','+2.24',100,'background:#B3543F'],
+  ['活跃群','+1.62',72,''],
+  ['成长群','+0.58',26,'background:#7A93A8']
+],' pp');
+
+/* ================= 试点群管理 ================= */
+const GROUPS=[
+  ['G20481','幸福里小区邻居群',213,'活跃群','成熟用户群',9.8,'实验组'],
+  ['G20482','宝妈好物分享',186,'活跃群','新用户群',8.4,'实验组'],
+  ['G20483','老家特产互助',156,'成长群','召回用户群',5.9,'对照组'],
+  ['G20484','周五夜跑俱乐部',142,'成长群','新用户群',6.2,'对照组'],
+  ['G20485','厂区宿舍2号楼',231,'衰退群','召回用户群',3.1,'实验组'],
+  ['G20486','宠物铲屎官',167,'活跃群','成熟用户群',10.5,'对照组'],
+  ['G20487','考研自习互助',128,'成长群','新用户群',4.8,'实验组'],
+  ['G20488','夕阳红养生堂',204,'衰退群','召回用户群',2.9,'对照组'],
+  ['G20489','新手爸妈营',179,'活跃群','新用户群',8.9,'实验组'],
+  ['G20490','数码发烧友',118,'成长群','成熟用户群',7.1,'对照组'],
+];
+function renderGroups(){
+  const f={l:$('#flt-layer').value,u:$('#flt-user').value,a:$('#flt-arm').value};
+  const rows=GROUPS.filter(g=>(!f.l||g[3]==f.l)&&(!f.u||g[4]==f.u)&&(!f.a||g[6]==f.a));
+  $('#gtable tbody').innerHTML=rows.map(g=>`<tr>
+    <td class="num">${g[0]}</td><td>${g[1]}</td><td class="num">${g[2]}</td>
+    <td><span class="tag ${g[3]=='活跃群'?'t-ok':g[3]=='成长群'?'t-exp':'t-warn'}">${g[3]}</span></td>
+    <td>${g[4]}</td><td class="num">${g[5].toFixed(1)}%</td>
+    <td><span class="tag ${g[6]=='实验组'?'t-exp':'t-ctl'}">${g[6]}</span></td>
+    <td style="text-align:right"><button class="btn btn-sm" onclick="toggleArm('${g[0]}')">${g[6]=='实验组'?'移入对照':'移入实验'}</button></td>
+  </tr>`).join('');
+  const e=GROUPS.filter(g=>g[6]=='实验组').length;
+  $('#gstat').textContent=`当前匹配 ${rows.length} 群 · 实验组 ${e} / 对照组 ${GROUPS.length-e}`;
+}
+function toggleArm(id){const g=GROUPS.find(x=>x[0]==id);g[6]=g[6]=='实验组'?'对照组':'实验组';renderGroups();
+  toast(`${id} 已移入${g[6]}（系统将在分层内重新平衡）`)}
+['flt-layer','flt-user','flt-arm'].forEach(id=>$('#'+id).onchange=renderGroups);
+renderGroups();
+
+/* ================= 实时响应工作台 ================= */
+const SKUS={
+  fan:[['格力 落地扇 3档风速',199,'🌀'],['美的 塔扇 遥控款',239,'🌀']],
+  tissue:[['维达 抽纸 24包整箱',39.9,'🧻'],['清风 原木抽纸 30包',45.8,'🧻']],
+  cooker:[['美的 电饭煲 4L 智能预约',299,'🍚'],['苏泊尔 电饭煲 4L 球釜',259,'🍚']],
+  bottle:[['膳魔师 保温杯 500ml',129,'🥤'],['象印 儿童保温杯 450ml',149,'🥤']],
+  laundry:[['蓝月亮 洗衣液 12斤',49.9,'🧺'],['立白 洗衣凝珠 80颗',59.9,'🧺']],
+  quilt:[['水星家纺 夏凉被 1.5m',89,'🛏'],['网易严选 凉感被 200×230',119,'🛏']],
+  phone:[['天语 老人机 大字大声',199,'📱'],['诺基亚 220 大按键',249,'📱']],
+  cat:[['皇家 室内成猫粮 4kg',159,'🐱'],['渴望 无谷猫粮 1.8kg',219,'🐱']],
+};
+const NOISE=['早上好呀各位 🌞','[图片]','哈哈哈哈哈笑死','接龙：今晚跳操打卡 1. 张姐','谢谢群主～','周日爬山有约的吗','[表情]','明天要降温了大家注意','这家店我上周去过，还行','小区门口又堵车了','[链接] 热搜文章','中午吃什么好','王阿姨家的猫真可爱','下班了下班了'];
+const DEMANDS=[
+  {t:'有没有推荐的电风扇？家里那个坏了',cat:'风扇',key:'fan',conf:.93},
+  {t:'群主，纸巾还有货吗？上次那个牌子挺好用',cat:'纸品',key:'tissue',conf:.88},
+  {t:'想买个电饭煲，300以内有啥好的',cat:'厨电',key:'cooker',conf:.86},
+  {t:'儿童保温杯哪个牌子好？娃上学要用',cat:'水杯',key:'bottle',conf:.91},
+  {t:'最近想囤点洗衣液，有活动吗',cat:'家清',key:'laundry',conf:.79},
+  {t:'有没有夏凉被推荐？睡不着我',cat:'家纺',key:'quilt',conf:.82},
+  {t:'求推荐老人手机，要字大声音大的',cat:'手机',key:'phone',conf:.95},
+  {t:'猫粮有活动吗？快吃完了',cat:'宠粮',key:'cat',conf:.90},
+];
+const NAMES=['张姐','老陈','莉莉','阿伟','王阿姨','小林','梅子','大鹏','芳芳','强子'];
+const COLORS=['#7A93A8','#9A8FA3','#8FA39A','#A3918F','#8E9AA3'];
+let counters={in:186421,pass:124802,demand:41600,match:38420,trig:5};
+let sel=null, triggered=0, dayCap=3, streamOn=true, dq=[];
+
+function renderPipe(){
+  const steps=[
+    ['消息接入',counters.in.toLocaleString(),'F-02'],
+    ['通过过滤',counters.pass.toLocaleString(),'F-03'],
+    ['需求信号',counters.demand.toLocaleString(),'F-04'],
+    ['匹配商品',counters.match.toLocaleString(),'F-05'],
+    ['触发响应',counters.trig.toLocaleString(),'F-06']];
+  $('#pipe').innerHTML=steps.map((s,i)=>`
+    ${i?'<span class="parr">→</span>':''}
+    <div class="pstep"><span class="pf fchip">${s[2]}</span>
+      <div class="pl">${s[0]}</div><div class="pv">${s[1]}</div></div>`).join('');
+}
+renderPipe();
+
+function msgHTML(m){
+  const conf=m.d?m.d.conf:0;
+  const auto=m.d&&conf>=+$('#th').value/100;
+  return `<div class="msg ${m.d?'':'dim'} ${sel&&sel.id==m.id?'pick':''}" data-id="${m.id}">
+    <div class="avatar" style="background:${m.color}">${m.name[0]}</div>
+    <div style="min-width:0;flex:1">
+      <div class="who">${m.name} · ${m.time}</div>
+      <div class="txt">${m.t}</div>
+      <div class="meta">${m.d
+        ?`<span class="tag t-up">需求信号 · ${m.d.cat}</span>
+          <span class="tag ${auto?'t-up':'t-warn'}">${auto?'≥ 阈值 · 建议自动触发':'＜ 阈值 · 人工待审'}</span>
+          <span style="font-size:11px;color:var(--faint)">置信 ${m.d.conf.toFixed(2)}</span>`
+        :`<span class="tag t-dim">噪声 · 已过滤</span>`}</div>
+    </div></div>`;
+}
+function pushMsg(m){
+  dq.push(m); if(dq.length>26)dq.shift();
+  $('#stream').innerHTML=dq.map(msgHTML).join('');
+  $('#stream').scrollTop=$('#stream').scrollHeight;
+  if(m.d)selectMsg(m.id);
+  counters.in++; if(!m.d)counters.pass++; else{counters.pass++;counters.demand++;counters.match++;}
+  renderPipe();
+}
+let mid=0;
+function now(){const d=new Date();return d.toTimeString().slice(0,5)}
+function genNoise(){return{id:++mid,name:NAMES[Math.random()*NAMES.length|0],color:COLORS[Math.random()*COLORS.length|0],
+  t:NOISE[Math.random()*NOISE.length|0],time:now()}}
+function genDemand(){const d=DEMANDS[Math.random()*DEMANDS.length|0];
+  return{id:++mid,name:NAMES[Math.random()*NAMES.length|0],color:COLORS[Math.random()*COLORS.length|0],t:d.t,time:now(),d}}
+function selectMsg(id){
+  const m=dq.find(x=>x.id==id); if(!m||!m.d){if(m)toast('噪声消息已被过滤，无需响应');return}
+  sel=m; $('#stream').innerHTML=dq.map(msgHTML).join('');
+  const th=+$('#th').value/100, ok=m.d.conf>=th;
+  const skus=SKUS[m.d.key];
+  $('#detail').innerHTML=`
+    <div style="background:#FAFAF7;border:1px solid var(--line);border-radius:10px;padding:12px 14px">
+      <div style="font-size:13px">"${m.t}"</div>
+      <div style="font-size:11.5px;color:var(--faint);margin-top:4px">来自 ${m.name} · 群 #G20481 · ${m.time}</div>
+    </div>
+    <div style="margin-top:14px;font-size:12.5px;color:var(--sub)">意图：${m.d.cat} · 置信度 <b style="color:var(--ink)">${m.d.conf.toFixed(2)}</b>
+      ${ok?'<span class="tag t-up" style="margin-left:6px">达标</span>':'<span class="tag t-warn" style="margin-left:6px">未达阈值</span>'}</div>
+    <div class="confbar"><i style="width:${m.d.conf*100}%;${ok?'':'background:var(--warn)'}"></i></div>
+    <div style="font-size:12.5px;color:var(--sub);margin-top:12px">商品池匹配（≈6,000 品中 Top2）<span class="fchip">F-05</span></div>
+    ${skus.map((s,i)=>`<div class="sku" data-i="${i}" onclick="pickSku(${i})">
+      <div class="thumb">${s[2]}</div>
+      <div style="flex:1"><div class="nm">${s[0]}</div>
+        <div style="font-size:11.5px;color:var(--faint)">佣金 8% · 京东物流</div></div>
+      <div class="pr"><small>¥</small>${s[1]}</div></div>`).join('')}
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn btn-pri" id="btn-trig" ${ok?'':'disabled'}>触发推送</button>
+      <button class="btn" onclick="sel=null;document.getElementById('detail').innerHTML='<div class=detail-empty>← 在左侧消息流中选择一条带「需求信号」标记的消息</div>'">忽略</button>
+      ${ok?'':'<span style="font-size:11.5px;color:var(--warn);align-self:center">低于阈值 0.'+$('#th').value+'，需人工确认</span>'}
+    </div>`;
+  pickSku(0);
+}
+function pickSku(i){
+  if(!sel)return;
+  $$('#detail .sku').forEach((el,j)=>el.classList.toggle('sel',j==i));
+  sel.sku=i;
+}
+$('#stream').addEventListener('click',e=>{const m=e.target.closest('.msg');if(m)selectMsg(+m.dataset.id)});
+document.addEventListener('click',e=>{
+  if(e.target.id=='btn-trig'&&sel){
+    if(triggered>=dayCap){toast(`已达单群单日响应上限 ${dayCap} 次（F-07 频控）`);return}
+    const s=SKUS[sel.d.key][sel.sku||0];
+    $('#wx-cover').textContent=s[2];
+    $('#wx-title').textContent=s[0];
+    $('#wx-sub').textContent=`群主为你找到「${sel.d.cat}」好物 · 来自群内需求`;
+    $('#wx-price').innerHTML=`<small style="font-size:11px">¥</small>${s[1]}`;
+    triggered++;counters.trig++;renderPipe();
+    toast(`已触发响应（今日 ${triggered}/${dayCap}）：${s[0]}`);
+  }
+});
+$('#th').oninput=e=>{$('#thv').textContent='0.'+e.target.value;
+  $('#stream').innerHTML=dq.map(msgHTML).join(''); if(sel)selectMsg(sel.id)};
+$('#btn-stream').onclick=()=>{streamOn=!streamOn;
+  $('#btn-stream').textContent=streamOn?'⏸ 暂停接入':'▶ 恢复接入'};
+$('#btn-inject').onclick=()=>{streamOn=true;$('#btn-stream').textContent='⏸ 暂停接入';pushMsg(genDemand())};
+setInterval(()=>{if(streamOn&&$('#view-live').classList.contains('on'))
+  pushMsg(Math.random()<0.28?genDemand():genNoise())},3200);
+/* 初始消息 */
+[genNoise(),genNoise(),genDemand(),genNoise(),genDemand(),genNoise(),genDemand()].forEach(m=>{dq.push(m)});
+$('#stream').innerHTML=dq.map(msgHTML).join('');
+counters.trig=5;
+</script>
+</body>
+</html>

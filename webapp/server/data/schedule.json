@@ -1,0 +1,12 @@
+[
+  {"group_id":"G001","slot":"09:00","product_id":"S005","product_name":"维达 抽纸 24包整箱","status":"pending"},
+  {"group_id":"G001","slot":"12:00","product_id":"S011","product_name":"蓝月亮 洗衣液 12斤","status":"pending"},
+  {"group_id":"G001","slot":"18:00","product_id":"S013","product_name":"水星家纺 夏凉被 1.5m","status":"pending"},
+  {"group_id":"G002","slot":"09:00","product_id":"S010","product_name":"象印 儿童保温杯 450ml","status":"pending"},
+  {"group_id":"G002","slot":"14:00","product_id":"S009","product_name":"膳魔师 保温杯 500ml","status":"pending"},
+  {"group_id":"G004","slot":"10:00","product_id":"S014","product_name":"天语 老人机 大字大声","status":"pending"},
+  {"group_id":"G004","slot":"16:00","product_id":"S017","product_name":"十月稻田 长粒香米 5kg","status":"pending"},
+  {"group_id":"G006","slot":"11:00","product_id":"S015","product_name":"皇家 室内成猫粮 4kg","status":"pending"},
+  {"group_id":"G008","slot":"09:00","product_id":"S001","product_name":"和田玉枣 500g 大红枣","status":"pending"},
+  {"group_id":"G008","slot":"15:00","product_id":"S017","product_name":"十月稻田 长粒香米 5kg","status":"pending"}
+]

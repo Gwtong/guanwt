@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>京东社群 · 快速响应试点面板（可用版 v1.0）</title>
+<style>
+:root{--bg:#F6F6F3;--card:#fff;--line:#E8E8E3;--line2:#DEDED8;--ink:#1F2733;--sub:#6B7280;
+--faint:#9CA3AF;--exp:#3E5C76;--exp-bg:#EDF1F5;--ctl:#A8A29E;--up:#B3543F;--up-bg:#F7EDE9;
+--ok:#4E7A5A;--ok-bg:#EBF2ED;--warn:#9A7B3F;--warn-bg:#F6F0E3;--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.93);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1240px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:20px;height:58px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;white-space:nowrap}
+.brand .dot{width:10px;height:10px;border-radius:3px;background:var(--exp)}
+.brand small{font-weight:400;color:var(--sub);font-size:12px}
+.tabs{display:flex;gap:2px;height:100%;margin-left:auto;overflow-x:auto}
+.tab{border:none;background:none;cursor:pointer;padding:0 14px;font-size:13.5px;color:var(--sub);border-bottom:2px solid transparent;height:100%;font-family:inherit;white-space:nowrap}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--exp)}
+main{max-width:1240px;margin:0 auto;padding:24px 20px 60px}
+.view{display:none}.view.on{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;box-shadow:0 1px 2px rgba(31,39,51,.03)}
+.card h3{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap}
+.card .desc{color:var(--sub);font-size:12.5px;margin-bottom:12px}
+.fchip{font-size:10.5px;font-weight:600;color:var(--exp);background:var(--exp-bg);border:1px solid #D7E0E9;border-radius:4px;padding:1px 6px;cursor:default}
+.grid{display:grid;gap:14px}.mt{margin-top:14px}
+.two{grid-template-columns:1fr 1fr}.three{grid-template-columns:repeat(3,1fr)}
+.kpis{grid-template-columns:repeat(6,1fr)}
+@media(max-width:1000px){.kpis{grid-template-columns:repeat(3,1fr)}.two,.three{grid-template-columns:1fr}}
+.kpi .label{font-size:12px;color:var(--sub)}.kpi .val{font-size:25px;font-weight:700;margin:2px 0;letter-spacing:-.5px}
+.kpi .foot{font-size:11.5px;color:var(--faint)}
+.up{color:var(--up)}.okc{color:var(--ok)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11.5px;color:var(--sub);font-weight:500;text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:8px;border-bottom:1px solid #F0F0EC;vertical-align:middle}
+tr:last-child td{border-bottom:none}tbody tr:hover td{background:#FAFAF7}
+.num{font-variant-numeric:tabular-nums}
+.tag{display:inline-block;font-size:11px;border-radius:4px;padding:1px 8px;line-height:1.7;white-space:nowrap}
+.t-exp{color:var(--exp);background:var(--exp-bg)}.t-ctl{color:#78716C;background:#F2F1EE}
+.t-up{color:var(--up);background:var(--up-bg)}.t-ok{color:var(--ok);background:var(--ok-bg)}
+.t-warn{color:var(--warn);background:var(--warn-bg)}.t-dim{color:var(--faint);background:#F4F4F1}
+.btn{font-family:inherit;font-size:12.5px;border-radius:8px;cursor:pointer;padding:6px 14px;border:1px solid var(--line2);background:#fff;color:var(--ink);transition:all .15s}
+.btn:hover{border-color:#C9C9C2;background:#FAFAF7}
+.btn-pri{background:var(--exp);border-color:var(--exp);color:#fff}.btn-pri:hover{background:#35506A;border-color:#35506A}
+.btn-sm{padding:3px 10px;font-size:12px}
+.btn-danger{color:var(--up)}.btn:disabled{opacity:.4;cursor:not-allowed}
+input,select,textarea{font-family:inherit;font-size:12.5px;padding:6px 9px;border:1px solid var(--line2);border-radius:8px;background:#fff;color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--exp)}
+textarea{width:100%;resize:vertical}
+td input[type=number]{width:64px;padding:4px 6px}
+.formrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.hbar{display:grid;grid-template-columns:70px 1fr 80px;gap:10px;align-items:center;font-size:12.5px;padding:6px 0}
+.hbar .tr{height:10px;background:#EFEFEB;border-radius:5px;overflow:hidden}
+.hbar .tr i{display:block;height:100%;border-radius:5px;background:var(--exp)}
+.hbar .vv{text-align:right;font-variant-numeric:tabular-nums;color:var(--sub)}
+.note{font-size:12px;color:var(--faint);border-top:1px dashed var(--line);margin-top:12px;padding-top:10px}
+.msg{display:flex;gap:10px;padding:9px 6px;border-bottom:1px solid #F0F0EC}
+.msg.dim{opacity:.55}
+.msg .txt{font-size:13px;word-break:break-all}
+.msg .who{font-size:11.5px;color:var(--sub)}
+.msg .meta{margin-top:3px;display:flex;gap:6px;flex-wrap:wrap}
+.mono{font-variant-numeric:tabular-nums}
+.empty{color:var(--faint);text-align:center;padding:28px 0;font-size:13px}
+.bench2{grid-template-columns:1.25fr 1fr;align-items:start}
+@media(max-width:1000px){.bench2{grid-template-columns:1fr}}
+#toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;font-size:13px;border-radius:10px;padding:10px 20px;opacity:0;pointer-events:none;transition:all .25s;z-index:99}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+footer{max-width:1240px;margin:0 auto;padding:0 20px 40px;color:var(--faint);font-size:12px;line-height:1.9}
+footer b{color:var(--sub)}
+.confbar{height:6px;background:#EFEFEB;border-radius:3px;overflow:hidden;margin:4px 0}
+.confbar i{display:block;height:100%;background:var(--exp)}
+.stat-big{font-size:32px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="topbar-in">
+  <div class="brand"><span class="dot"></span>京东社群 · 快速响应试点面板<small>可用版 v1.0 · 数据本地持久化</small></div>
+  <nav class="tabs">
+    <button class="tab on" data-v="ov">总览</button>
+    <button class="tab" data-v="gr">试点群</button>
+    <button class="tab" data-v="pd">商品池</button>
+    <button class="tab" data-v="bk">响应工作台</button>
+    <button class="tab" data-v="mt">指标与检验</button>
+    <button class="tab" data-v="st">设置与数据</button>
+  </nav>
+</div></div>
+
+<main>
+<!-- 总览 -->
+<section class="view on" id="v-ov">
+  <div class="grid kpis" id="kpis"></div>
+  <div class="grid two mt">
+    <div class="card"><h3>各群最新周 · 群点击活跃率 <span class="fchip">F-08</span></h3>
+      <div class="desc">= 周内营销资源点击量 ÷ 群人数，按分组着色（蓝=实验组，灰=对照组）。</div>
+      <div id="ov-bars"></div></div>
+    <div class="card"><h3>响应记录 <span class="fchip">F-06</span></h3>
+      <div class="desc">最近触发的定向响应与点击回收情况。</div>
+      <div id="ov-resp" style="max-height:280px;overflow-y:auto"></div></div>
+  </div>
+</section>
+
+<!-- 试点群 -->
+<section class="view" id="v-gr">
+  <div class="card">
+    <h3>试点群管理 <span class="fchip">F-01</span></h3>
+    <div class="desc">圈选规则：仅运营群（排除新群/死群）；按活跃分层 × 用户类型分层，实验/对照 1:1。</div>
+    <div class="formrow">
+      <input id="g-name" placeholder="群名称" style="width:160px">
+      <input id="g-size" type="number" placeholder="群人数" style="width:90px">
+      <select id="g-layer"><option>活跃群</option><option>成长群</option><option>衰退群</option></select>
+      <select id="g-utype"><option>新用户群</option><option>成熟用户群</option><option>召回用户群</option></select>
+      <select id="g-arm"><option>实验组</option><option>对照组</option></select>
+      <button class="btn btn-pri" onclick="addGroup()">＋ 添加群</button>
+      <span id="g-stat" style="margin-left:auto;font-size:12.5px;color:var(--sub)"></span>
+    </div>
+    <div style="overflow-x:auto"><table><thead><tr>
+      <th>群 ID</th><th>群名称</th><th class="num">人数</th><th>活跃分层</th><th>用户类型</th>
+      <th class="num">最新周活跃率</th><th>分组</th><th style="text-align:right">操作</th>
+    </tr></thead><tbody id="g-body"></tbody></table></div>
+    <div class="note">每周点击数据在「指标与检验」页录入，此处维护群的静态属性与分组。</div>
+  </div>
+</section>
+
+<!-- 商品池 -->
+<section class="view" id="v-pd">
+  <div class="card">
+    <h3>商品池管理 <span class="fchip">F-05</span></h3>
+    <div class="desc">定向响应的商品全部来自此池（生产环境对接约 6,000 品商品池，此处为试点维护的子集）。</div>
+    <div class="formrow">
+      <input id="p-name" placeholder="商品名称" style="width:220px">
+      <input id="p-cat" placeholder="类目（如 风扇）" style="width:130px">
+      <input id="p-price" type="number" step="0.1" placeholder="价格" style="width:90px">
+      <input id="p-comm" type="number" placeholder="佣金%" style="width:80px">
+      <button class="btn btn-pri" onclick="addProduct()">＋ 添加商品</button>
+    </div>
+    <div style="overflow-x:auto"><table><thead><tr>
+      <th>SKU</th><th>商品名称</th><th>类目</th><th class="num">价格</th><th class="num">佣金</th><th style="text-align:right">操作</th>
+    </tr></thead><tbody id="p-body"></tbody></table></div>
+  </div>
+  <div class="card mt">
+    <h3>意图识别规则（规则引擎）<span class="fchip">F-04</span></h3>
+    <div class="desc">当前为关键词规则引擎（可解释、零成本）；类目与商品池联动；生产环境可替换为 LLM 接口。</div>
+    <table><thead><tr><th>类目</th><th>关键词（逗号分隔）</th><th>基础置信</th></tr></thead><tbody id="r-body"></tbody></table>
+    <div class="note">置信度 = 基础置信 + 0.08 × 命中关键词数（上限 0.97）；低于阈值的需求信号进入人工待审。</div>
+  </div>
+</section>
+
+<!-- 工作台 -->
+<section class="view" id="v-bk">
+  <div class="grid bench2">
+    <div class="card">
+      <h3>消息接入与识别 <span class="fchip">F-02</span><span class="fchip">F-03</span><span class="fchip">F-04</span></h3>
+      <div class="desc">粘贴群消息（每行一条）→ 过滤噪声 → 识别需求。模拟机器人回传链路的消息批处理。</div>
+      <div class="formrow">
+        <select id="b-group"></select>
+        <input id="b-who" placeholder="发言人（可留空）" style="width:130px">
+        <button class="btn btn-pri" onclick="processInput()">⚡ 处理消息</button>
+      </div>
+      <textarea id="b-input" rows="3" placeholder="每行一条群消息，例如：&#10;有没有推荐的电风扇？家里那个坏了&#10;哈哈哈哈&#10;求推荐老人手机，要字大声音大的"></textarea>
+      <div id="b-list" style="margin-top:12px;max-height:420px;overflow-y:auto"></div>
+    </div>
+    <div style="display:grid;gap:14px">
+      <div class="card">
+        <h3>保护规则（实时生效）<span class="fchip">F-07</span></h3>
+        <div id="bk-rules"></div>
+      </div>
+      <div class="card">
+        <h3>响应日志 <span class="fchip">F-06</span></h3>
+        <div class="desc">触发记录受频控与免打扰约束；点击需人工回收入库。</div>
+        <div id="b-resp" style="max-height:300px;overflow-y:auto"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 指标 -->
+<section class="view" id="v-mt">
+  <div class="card">
+    <h3>每周点击数据 <span class="fchip">F-08</span></h3>
+    <div class="desc">直接在表格中编辑各群每周「营销资源点击量」（分母=群人数）。改动即时保存。</div>
+    <div style="overflow-x:auto"><table><thead id="mt-head"></thead><tbody id="mt-body"></tbody></table></div>
+  </div>
+  <div class="grid two mt">
+    <div class="card">
+      <h3>A/B 显著性检验 <span class="fchip">F-08</span></h3>
+      <div class="desc">群级聚合 Welch 双样本 t 检验，使用各群最新周活跃率。</div>
+      <button class="btn btn-pri" onclick="runTest()">▶ 运行检验</button>
+      <div id="mt-result" style="margin-top:14px"><div class="empty">点击「运行检验」查看结果</div></div>
+    </div>
+    <div class="card">
+      <h3>批量导入周数据</h3>
+      <div class="desc">格式：群ID,周次,点击量（如 G001,W8,205），每行一条，导入后自动覆盖。</div>
+      <textarea id="mt-import" rows="6" placeholder="G001,W8,205&#10;G002,W8,180"></textarea>
+      <button class="btn mt" style="margin-top:8px" onclick="importWeeks()">导入</button>
+    </div>
+  </div>
+</section>
+
+<!-- 设置 -->
+<section class="view" id="v-st">
+  <div class="grid two">
+    <div class="card">
+      <h3>触发规则设置 <span class="fchip">F-07</span></h3>
+      <div class="formrow"><span style="width:150px">意图置信阈值</span>
+        <input type="range" id="s-th" min="60" max="95" step="5" oninput="S.settings.th=+this.value/100;this.nextElementSibling.textContent='0.'+this.value;save();renderBenchRules()">
+        <b id="s-thv"></b></div>
+      <div class="formrow"><span style="width:150px">单群单日响应上限</span>
+        <input type="number" id="s-cap" min="1" max="12" style="width:70px" onchange="S.settings.cap=+this.value;save();renderBenchRules()"></div>
+      <div class="formrow"><span style="width:150px">免打扰开始（时）</span>
+        <input type="number" id="s-qs" min="0" max="23" style="width:70px" onchange="S.settings.qs=+this.value;save()"></div>
+      <div class="formrow"><span style="width:150px">免打扰结束（时）</span>
+        <input type="number" id="s-qe" min="0" max="23" style="width:70px" onchange="S.settings.qe=+this.value;save()"></div>
+      <div class="note">频控以「响应日志」当日记录为准；免打扰时段内触发请求将被拒绝并提示。</div>
+    </div>
+    <div class="card">
+      <h3>数据管理</h3>
+      <div class="desc">数据保存在浏览器本地（localStorage），可导出 JSON 备份或跨设备迁移。</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <button class="btn" onclick="exportData()">导出 JSON</button>
+        <button class="btn" onclick="importData()">导入 JSON</button>
+        <button class="btn" onclick="loadSeed(true)">载入演示数据</button>
+        <button class="btn btn-danger" onclick="resetAll()">清空全部数据</button>
+      </div>
+      <textarea id="s-io" rows="9" placeholder="导出的 JSON 会显示在这里；粘贴 JSON 后点「导入 JSON」"></textarea>
+      <div class="note" id="store-info"></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <b>引用链</b>：agents.md → BRD.md（R-xx / F-01…F-08）→ prototype/index.html（原型，已定稿）→ <b>app/index.html（本工具，MVP）</b>。<br>
+  本版为前端单体 + 本地持久化：单机可用；多用户/真实机器人回传需接后端（下一版：前后端分离 + Cloudflare）。指标均由真实录入数据计算，无写死数字。
+</footer>
+<div id="toast"></div>
+
+<script>
+/* ================= 存储 ================= */
+const LS='jdqr-app-v1', WEEKS=8;
+let S=null;
+const $=s=>document.querySelector(s);
+function uid(){return 'G'+String(Math.random()).slice(2,7)}
+function save(){localStorage.setItem(LS,JSON.stringify(S));updateStoreInfo()}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2400)}
+
+function seed(){
+  const layers=['活跃群','成长群','衰退群'],uts=['新用户群','成熟用户群','召回用户群'];
+  const names=['幸福里邻居群','宝妈好物分享','老家特产互助','夜跑俱乐部','厂区宿舍2号楼','宠物铲屎官','考研自习互助','夕阳红养生堂','新手爸妈营','数码发烧友','美妆小分队','省钱达人团'];
+  const groups=names.map((n,i)=>{
+    const size=120+Math.round(Math.random()*110);
+    const g={id:'G'+String(i+1).padStart(3,'0'),name:n,size,layer:layers[i%3],utype:uts[(i+1)%3],arm:i%2?'对照组':'实验组',weeks:{}};
+    for(let w=1;w<=WEEKS;w++){
+      let act;
+      if(g.arm==='对照组') act=7.3+Math.random()*.4;
+      else act=w<=3?7.35+Math.random()*.3:7.6+(w-3)*.34+Math.random()*.15;
+      g.weeks['W'+w]=Math.max(1,Math.round(size*act/100));
+    }
+    return g;
+  });
+  const products=[
+    ['格力 落地扇 3档风速','风扇',199,8],['美的 塔扇 遥控款','风扇',239,7],
+    ['维达 抽纸 24包整箱','纸品',39.9,10],['清风 原木抽纸 30包','纸品',45.8,10],
+    ['美的 电饭煲 4L 智能预约','厨电',299,6],['苏泊尔 电饭煲 4L 球釜','厨电',259,6],
+    ['膳魔师 保温杯 500ml','水杯',129,12],['象印 儿童保温杯 450ml','水杯',149,11],
+    ['蓝月亮 洗衣液 12斤','家清',49.9,9],['立白 洗衣凝珠 80颗','家清',59.9,9],
+    ['水星家纺 夏凉被 1.5m','家纺',89,10],['天语 老人机 大字大声','手机',199,5],
+    ['皇家 室内成猫粮 4kg','宠粮',159,8]
+  ].map((p,i)=>({id:'S'+String(i+1).padStart(3,'0'),name:p[0],cat:p[1],price:p[2],comm:p[3]}));
+  const rules=[
+    ['风扇',['风扇','电风扇','落地扇','塔扇']],
+    ['纸品',['纸巾','抽纸','卷纸']],
+    ['厨电',['电饭煲','电饭锅','高压锅','空气炸锅']],
+    ['水杯',['保温杯','水杯','杯子','儿童杯']],
+    ['家清',['洗衣液','洗衣凝珠','洗洁精','消毒液']],
+    ['家纺',['被子','夏凉被','四件套','枕头','凉席']],
+    ['手机',['手机','老人机','备用机','千元机']],
+    ['宠粮',['猫粮','狗粮','猫砂','宠物']]
+  ].map(r=>({cat:r[0],kws:r[1],base:.72}));
+  return {groups,products,rules,messages:[],responses:[],
+    settings:{th:.85,cap:3,qs:22,qe:8}};
+}
+function loadSeed(confirm){
+  if(confirm&&!window.confirm('载入演示数据将覆盖当前全部数据，确定？'))return;
+  S=seed();save();renderAll();toast('已载入演示数据');
+}
+function resetAll(){
+  if(!window.confirm('⚠️ 将清空全部数据（群/商品/消息/响应/周数据），确定？'))return;
+  localStorage.removeItem(LS);S=null;init();toast('已清空');
+}
+
+/* ================= 统计：Welch t 检验 ================= */
+function gammln(x){const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,.1208650973866179e-2,-.5395239384953e-5];
+  let y=x,tmp=x+5.5;tmp-=(x+.5)*Math.log(tmp);let ser=1.000000000190015;
+  for(let j=0;j<6;j++)ser+=c[j]/++y;return -tmp+Math.log(2.5066282746310005*ser/x)}
+function betacf(a,b,x){const MAXIT=100,EPS=3e-7,FPMIN=1e-30;
+  const qab=a+b,qap=a+1,qam=a-1;
+  let c=1,d=1-qab*x/qap;
+  if(Math.abs(d)<FPMIN)d=FPMIN;
+  d=1/d;let h=d;
+  for(let m=1;m<=MAXIT;m++){const m2=2*m;
+    let aa=m*(b-m)*x/((qam+m2)*(a+m2));
+    d=1+aa*d;if(Math.abs(d)<FPMIN)d=FPMIN;
+    c=1+aa/c;if(Math.abs(c)<FPMIN)c=FPMIN;
+    d=1/d;h*=d*c;
+    aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));
+    d=1+aa*d;if(Math.abs(d)<FPMIN)d=FPMIN;
+    c=1+aa/c;if(Math.abs(c)<FPMIN)c=FPMIN;
+    d=1/d;const del=d*c;h*=del;
+    if(Math.abs(del-1)<EPS)break}
+  return h}
+function betai(a,b,x){if(x<=0)return 0;if(x>=1)return 1;
+  let bt=Math.exp(gammln(a+b)-gammln(a)-gammln(b)+a*Math.log(x)+b*Math.log(1-x));
+  if(x<(a+1)/(a+b+2))return bt*betacf(a,b,x)/a;
+  return 1-bt*betacf(b,a,1-x)/b}
+function mean(a){return a.reduce((s,v)=>s+v,0)/a.length}
+function variance(a){const m=mean(a);return a.reduce((s,v)=>s+(v-m)*(v-m),0)/(a.length-1)}
+function welch(a,b){
+  if(a.length<2||b.length<2)return null;
+  const m1=mean(a),m2=mean(b),v1=variance(a),v2=variance(b),n1=a.length,n2=b.length;
+  const se1=v1/n1,se2=v2/n2,se=se1+se2,t=(m1-m2)/Math.sqrt(se);
+  const df=se*se/(se1*se1/(n1-1)+se2*se2/(n2-1));
+  const p=betai(df/2,.5,df/(df+t*t));
+  return{m1,m2,t,df,p,n1,n2}}
+
+/* ================= 意图识别（规则引擎） ================= */
+function detect(text){
+  let best=null;
+  for(const r of S.rules){
+    const hits=r.kws.filter(k=>text.includes(k)).length;
+    if(hits>0){const conf=Math.min(.97,r.base+.08*hits);
+      if(!best||conf>best.conf)best={cat:r.cat,conf}}
+  }
+  return best;
+}
+function matchProducts(cat){return S.products.filter(p=>p.cat===cat)}
+
+/* ================= 工作台 ================= */
+function today(){return new Date().toISOString().slice(0,10)}
+function quietNow(){const h=new Date().getHours(),{qs,qe}=S.settings;
+  return qs<qe?(h>=qs||h<qe):(h>=qs||h<qe)}
+function processInput(){
+  const lines=$('#b-input').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  if(!lines.length){toast('请先输入消息');return}
+  const g=$('#b-group').value,who=$('#b-who').value.trim()||'群成员';
+  let n=0;
+  for(const t of lines){
+    const d=detect(t);
+    S.messages.unshift({id:Date.now()+Math.random(),time:today(),group:g,who,text:t,
+      noise:!d,intent:d?d.cat:null,conf:d?d.conf:0});
+    n++;
+  }
+  S.messages=S.messages.slice(0,300);$('#b-input').value='';save();renderBenchList();
+  const dem=S.messages.slice(0,n).filter(m=>!m.noise).length;
+  toast(`已处理 ${n} 条：噪声 ${n-dem} · 需求信号 ${dem}`);
+}
+function renderBenchList(){
+  const list=S.messages.slice(0,50),th=S.settings.th;
+  $('#b-list').innerHTML=list.length?list.map(m=>{
+    const ok=m.conf>=th;
+    return `<div class="msg ${m.noise?'dim':''}">
+    <div style="flex:1;min-width:0">
+      <div class="who">${m.who} · ${m.group} · ${m.time}</div>
+      <div class="txt">${esc(m.text)}</div>
+      <div class="meta">${m.noise
+        ?'<span class="tag t-dim">噪声 · 已过滤</span>'
+        :`<span class="tag t-up">需求 · ${m.intent}</span>
+          <span class="tag ${ok?'t-up':'t-warn'}">${ok?'≥阈值 · 可触发':'＜阈值 · 待审'}</span>
+          <span style="font-size:11px;color:var(--faint)">置信 ${m.conf.toFixed(2)}</span>
+          ${ok?renderMatchSelect(m):''}`}</div>
+    </div></div>`}).join(''):'<div class="empty">暂无消息，上方粘贴群消息后点「处理消息」</div>';
+}
+function renderMatchSelect(m){
+  const ps=matchProducts(m.intent);
+  if(!ps.length)return '<span class="tag t-warn">商品池无此类目</span>';
+  return `<select style="font-size:11.5px;padding:2px 6px" id="sel-${m.id}">
+    ${ps.map((p,i)=>`<option value="${i}">${esc(p.name)} ¥${p.price}</option>`).join('')}
+  </select>
+  <button class="btn btn-sm btn-pri" onclick="triggerPush('${m.id}')">触发推送</button>`;
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function triggerPush(mid){
+  const m=S.messages.find(x=>String(x.id)===String(mid));
+  if(!m)return;
+  const th=S.settings.th;
+  if(m.conf<th){toast(`置信 ${m.conf.toFixed(2)} 低于阈值 ${th.toFixed(2)}，需人工待审`);return}
+  if(quietNow()){toast(`免打扰时段（${S.settings.qs}:00–${S.settings.qe}:00），禁止触发`);return}
+  const day=S.responses.filter(r=>r.group===m.group&&r.date===today()).length;
+  if(day>=S.settings.cap){toast(`群 ${m.group} 今日已触发 ${day}/${S.settings.cap} 次，频控拦截`);return}
+  const ps=matchProducts(m.intent),sel=$('#sel-'+mid),p=ps[sel?+sel.value:0];
+  if(!p){toast('商品池无此类目商品');return}
+  S.responses.unshift({id:Date.now()+Math.random(),date:today(),time:new Date().toTimeString().slice(0,5),
+    group:m.group,msg:m.text,product:p.name,price:p.price,clicked:false});
+  S.responses=S.responses.slice(0,300);save();
+  renderResp();renderKPIs();
+  toast(`已触发：${p.name}（今日 ${day+1}/${S.settings.cap}）`);
+}
+function renderResp(){
+  const list=S.responses.slice(0,40);
+  const box=$('#b-resp'),ov=$('#ov-resp');
+  const html=l=>l.length?l.map(r=>`<div class="msg">
+    <div style="flex:1;min-width:0">
+      <div class="who">${r.date} ${r.time} · ${r.group}</div>
+      <div class="txt" style="font-size:12.5px">「${esc(r.msg.slice(0,26))}${r.msg.length>26?'…':''}」→ ${esc(r.product)}</div>
+      <div class="meta"><span class="tag t-exp">¥${r.price}</span>
+        <button class="btn btn-sm ${r.clicked?'':'btn-pri'}" onclick="toggleClick('${r.id}')">${r.clicked?'✓ 已点击':'记录点击'}</button>
+        <button class="btn btn-sm btn-danger" onclick="delResp('${r.id}')">撤销</button></div>
+    </div></div>`).join(''):'<div class="empty">暂无响应记录</div>';
+  box.innerHTML=html(list);ov.innerHTML=html(list.slice(0,10));
+}
+function toggleClick(id){const r=S.responses.find(x=>String(x.id)===String(id));
+  r.clicked=!r.clicked;save();renderResp();renderKPIs()}
+function delResp(id){S.responses=S.responses.filter(x=>String(x.id)!==String(id));save();renderResp();renderKPIs();toast('已撤销')}
+function renderBenchRules(){
+  const s=S.settings;
+  $('#bk-rules').innerHTML=`
+    <div class="hbar"><span>置信阈值</span><div class="tr"><i style="width:${s.th*100}%;background:var(--warn)"></i></div><span class="vv">${s.th.toFixed(2)}</span></div>
+    <div class="hbar"><span>单群日上限</span><div class="tr"><i style="width:${s.cap/12*100}%"></i></div><span class="vv">${s.cap} 次</span></div>
+    <div class="hbar"><span>免打扰</span><div class="tr"><i style="width:${(24-(s.qe-s.qs+24)%24)/24*100}%;background:var(--ctl)"></i></div><span class="vv">${s.qs}:00–${s.qe}:00</span></div>
+    <div class="note">今日已触发：${S.responses.filter(r=>r.date===today()).length} 次（全部试点群合计）</div>`;
+}
+
+/* ================= 群管理 ================= */
+function addGroup(){
+  const name=$('#g-name').value.trim();if(!name){toast('请输入群名称');return}
+  const size=+$('#g-size').value||150;
+  S.groups.push({id:uid(),name,size,layer:$('#g-layer').value,utype:$('#g-utype').value,arm:$('#g-arm').value,weeks:{}});
+  $('#g-name').value='';$('#g-size').value='';save();renderAll();toast('已添加 '+name);
+}
+function toggleArm(id){const g=S.groups.find(x=>x.id===id);g.arm=g.arm==='实验组'?'对照组':'实验组';save();renderAll()}
+function delGroup(id){
+  if(!window.confirm('删除该群及其周数据？'))return;
+  S.groups=S.groups.filter(x=>x.id!==id);save();renderAll();
+}
+function latestAct(g){
+  let w=0;for(let i=WEEKS;i>=1;i--){if(g.weeks['W'+i]!=null){w=i;break}}
+  if(!w)return null;return{w:'W'+w,act:g.weeks['W'+w]/g.size*100};
+}
+function renderGroups(){
+  $('#g-body').innerHTML=S.groups.map(g=>{
+    const la=latestAct(g);
+    return `<tr><td class="num">${g.id}</td><td>${esc(g.name)}</td><td class="num">${g.size}</td>
+    <td><span class="tag ${g.layer==='活跃群'?'t-ok':g.layer==='成长群'?'t-exp':'t-warn'}">${g.layer}</span></td>
+    <td>${g.utype}</td>
+    <td class="num">${la?la.act.toFixed(2)+'% <span style="color:var(--faint);font-size:11px">'+la.w+'</span>':'–'}</td>
+    <td><span class="tag ${g.arm==='实验组'?'t-exp':'t-ctl'}">${g.arm}</span></td>
+    <td style="text-align:right;white-space:nowrap">
+      <button class="btn btn-sm" onclick="toggleArm('${g.id}')">${g.arm==='实验组'?'移入对照':'移入实验'}</button>
+      <button class="btn btn-sm btn-danger" onclick="delGroup('${g.id}')">删除</button></td></tr>`}).join('');
+  const e=S.groups.filter(g=>g.arm==='实验组').length;
+  $('#g-stat').textContent=`共 ${S.groups.length} 群 · 实验 ${e} / 对照 ${S.groups.length-e}`;
+}
+
+/* ================= 商品池 & 规则 ================= */
+function addProduct(){
+  const name=$('#p-name').value.trim();if(!name){toast('请输入商品名称');return}
+  const cat=$('#p-cat').value.trim()||'未分类';
+  S.products.push({id:'S'+Date.now()%10000,name,cat,price:+$('#p-price').value||0,comm:+$('#p-comm').value||0});
+  $('#p-name').value='';$('#p-cat').value='';$('#p-price').value='';$('#p-comm').value='';
+  save();renderProducts();toast('已添加商品');
+}
+function delProduct(id){S.products=S.products.filter(p=>p.id!==id);save();renderProducts()}
+function renderProducts(){
+  $('#p-body').innerHTML=S.products.map(p=>`<tr>
+    <td class="num">${p.id}</td><td>${esc(p.name)}</td><td><span class="tag t-dim">${esc(p.cat)}</span></td>
+    <td class="num">¥${p.price}</td><td class="num">${p.comm}%</td>
+    <td style="text-align:right"><button class="btn btn-sm btn-danger" onclick="delProduct('${p.id}')">删除</button></td></tr>`).join('');
+  $('#r-body').innerHTML=S.rules.map((r,i)=>`<tr>
+    <td><span class="tag t-dim">${esc(r.cat)}</span></td>
+    <td><input style="width:100%" value="${r.kws.join(',')}" onchange="S.rules[${i}].kws=this.value.split(/[,，]/).map(s=>s.trim()).filter(Boolean);save();toast('规则已更新')"></td>
+    <td class="num">${r.base.toFixed(2)}</td></tr>`).join('');
+}
+
+/* ================= 指标 ================= */
+function renderMetricTable(){
+  let head='<tr><th>群 ID</th><th>名称</th><th>分组</th><th class="num">人数</th>';
+  for(let w=1;w<=WEEKS;w++)head+=`<th class="num">W${w}点击</th>`;
+  head+='<th class="num">最新活跃率</th></tr>';
+  $('#mt-head').innerHTML=head;
+  $('#mt-body').innerHTML=S.groups.map((g,i)=>{
+    const la=latestAct(g);let row=`<tr><td class="num">${g.id}</td><td>${esc(g.name)}</td>
+      <td><span class="tag ${g.arm==='实验组'?'t-exp':'t-ctl'}">${g.arm.slice(0,2)}</span></td><td class="num">${g.size}</td>`;
+    for(let w=1;w<=WEEKS;w++){
+      const v=g.weeks['W'+w];
+      row+=`<td><input type="number" min="0" value="${v!=null?v:''}" onchange="setWeek(${i},${w},this.value)"></td>`;
+    }
+    row+=`<td class="num">${la?la.act.toFixed(2)+'%':'–'}</td></tr>`;return row}).join('');
+}
+function setWeek(i,w,v){
+  if(v==='')delete S.groups[i].weeks['W'+w];
+  else S.groups[i].weeks['W'+w]=Math.max(0,Math.round(+v));
+  save();renderKPIs();renderGroups();
+}
+function runTest(){
+  const exp=[],ctl=[];
+  for(const g of S.groups){const la=latestAct(g);if(!la)continue;
+    (g.arm==='实验组'?exp:ctl).push(la.act)}
+  const res=welch(exp,ctl);
+  const box=$('#mt-result');
+  if(!res){box.innerHTML=`<div class="empty">实验/对照组各需 ≥2 个有周数据的群</div>`;return}
+  const diff=res.m1-res.m2,rel=res.m2?diff/res.m2*100:0,sig=res.p<.05;
+  box.innerHTML=`
+    <div class="stat-big ${diff>=0?'up':''}">${diff>=0?'+':''}${diff.toFixed(2)}<span style="font-size:15px">pp</span></div>
+    <div style="color:var(--sub);font-size:12.5px;margin-bottom:10px">实验组 ${res.m1.toFixed(2)}% vs 对照组 ${res.m2.toFixed(2)}%（相对 ${rel>=0?'+':''}${rel.toFixed(1)}%）</div>
+    <table>
+      <tr><td style="color:var(--sub)">样本（群）</td><td class="num" style="text-align:right">${res.n1} / ${res.n2}</td></tr>
+      <tr><td style="color:var(--sub)">t 统计量</td><td class="num" style="text-align:right">${res.t.toFixed(3)}</td></tr>
+      <tr><td style="color:var(--sub)">自由度（Welch）</td><td class="num" style="text-align:right">${res.df.toFixed(1)}</td></tr>
+      <tr><td style="color:var(--sub)">p 值（双尾）</td><td class="num" style="text-align:right;font-weight:600">${res.p<.001?'<0.001':res.p.toFixed(3)}</td></tr>
+      <tr><td style="color:var(--sub)">结论（α=0.05）</td><td style="text-align:right"><span class="tag ${sig?'t-up':'t-warn'}">${sig?'统计显著 ✓':'未达显著'}</span></td></tr>
+    </table>`;
+}
+function importWeeks(){
+  const lines=$('#mt-import').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  let n=0;
+  for(const l of lines){
+    const[gid,w,c]=l.split(/[,，]/).map(s=>s.trim());
+    const g=S.groups.find(x=>x.id.toLowerCase()===gid.toLowerCase());
+    if(g&&/^W[1-8]$/.test(w)&&+c>=0){g.weeks[w]=Math.round(+c);n++}
+  }
+  save();renderMetricTable();renderKPIs();renderGroups();
+  toast(`导入 ${n}/${lines.length} 条`);
+}
+
+/* ================= 总览 ================= */
+function renderKPIs(){
+  const exp=[],ctl=[];
+  for(const g of S.groups){const la=latestAct(g);if(la)(g.arm==='实验组'?exp:ctl).push(la.act)}
+  const m1=exp.length?mean(exp):null,m2=ctl.length?mean(ctl):null;
+  const res=welch(exp,ctl);
+  const wk=S.responses.filter(r=>r.date===today());
+  const ctr=S.responses.length?S.responses.filter(r=>r.clicked).length/S.responses.length*100:null;
+  const fmt=v=>v==null?'–':v.toFixed(2)+'%';
+  const diff=m1!=null&&m2!=null?m1-m2:null;
+  $('#kpis').innerHTML=[
+    ['试点群数',S.groups.length,`实验 ${exp.length} / 对照 ${ctl.length}`],
+    ['实验组 · 周活跃率',fmt(m1),'各群最新周均值'],
+    ['对照组 · 周活跃率',fmt(m2),'各群最新周均值'],
+    ['差值（pp）',diff==null?'–':(diff>=0?'+':'')+diff.toFixed(2),res?`p=${res.p<.001?'<0.001':res.p.toFixed(3)} ${res.p<.05?'显著 ✓':''}`:'样本不足'],
+    ['今日触发响应',wk.length,`累计 ${S.responses.length} 条`],
+    ['响应卡片 CTR',ctr==null?'–':ctr.toFixed(1)+'%',`${S.responses.filter(r=>r.clicked).length}/${S.responses.length} 已回收点击`]
+  ].map(k=>`<div class="card kpi"><div class="label">${k[0]}</div>
+    <div class="val num ${k[0].includes('差值')&&diff>=0?'up':''}">${k[1]}</div>
+    <div class="foot">${k[2]}</div></div>`).join('');
+  const rows=S.groups.map(g=>{const la=latestAct(g);return la?{name:g.name,act:la.act,arm:g.arm}:null}).filter(Boolean)
+    .sort((a,b)=>b.act-a.act);
+  $('#ov-bars').innerHTML=rows.map(r=>`<div class="hbar"><span title="${esc(r.name)}">${esc(r.name.slice(0,6))}</span>
+    <div class="tr"><i style="width:${Math.min(100,r.act*10)}%;${r.arm==='对照组'?'background:var(--ctl)':''}"></i></div>
+    <span class="vv">${r.act.toFixed(2)}%</span></div>`).join('')||'<div class="empty">暂无周数据</div>';
+}
+
+/* ================= 数据管理 ================= */
+function exportData(){$('#s-io').value=JSON.stringify(S);$('#s-io').select();toast('已导出到文本框，可全选复制')}
+function importData(){
+  try{const d=JSON.parse($('#s-io').value);
+    if(!d.groups||!d.products)throw 0;
+    S=d;save();renderAll();toast('导入成功');
+  }catch(e){toast('JSON 解析失败，请检查格式')}
+}
+function updateStoreInfo(){
+  const el=$('#store-info');if(!el)return;
+  const bytes=(localStorage.getItem(LS)||'').length;
+  el.textContent=`当前存储：${S.groups.length} 群 · ${S.products.length} 商品 · ${S.messages.length} 消息 · ${S.responses.length} 响应（约 ${(bytes/1024).toFixed(1)} KB）`;
+}
+function renderSettings(){
+  $('#s-th').value=S.settings.th*100;$('#s-thv').textContent=S.settings.th.toFixed(2);
+  $('#s-cap').value=S.settings.cap;$('#s-qs').value=S.settings.qs;$('#s-qe').value=S.settings.qe;
+}
+function renderBenchGroupSel(){
+  const cur=$('#b-group').value;
+  $('#b-group').innerHTML=S.groups.map(g=>`<option value="${g.id}" ${g.id===cur?'selected':''}>${esc(g.name)}（${g.arm.slice(0,2)}）</option>`).join('');
+}
+function renderAll(){renderKPIs();renderGroups();renderProducts();renderBenchList();renderResp();renderBenchRules();renderMetricTable();renderSettings();renderBenchGroupSel();updateStoreInfo()}
+
+/* ================= 启动 ================= */
+function init(){
+  try{S=JSON.parse(localStorage.getItem(LS))}catch(e){S=null}
+  if(!S||!S.groups){S=seed();/* 首次进入自动载入演示数据，可在设置页清空 */}
+  save();renderAll();
+}
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));$('#v-'+t.dataset.v).classList.add('on');
+});
+init();
+</script>
+</body>
+</html>
