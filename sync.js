@@ -89,8 +89,17 @@ function syncSchema(SSOTmap) {
 function appendChangelog(allChanges) {
   const date = new Date().toISOString().slice(0, 10);
   const lines = allChanges.map(c => `- ${c.file} · ${c.field}: \`${c.from}\` → \`${c.to}\``).join('\n');
-  const entry = `\n## [${date}] 同步（受控）\n- 来源：SSOT.md §2 策略参数当前值\n${lines}\n- 提交：本次同步（git log 最新一条即对应）\n`;
-  fs.appendFileSync(CHANGELOG, entry);
+  const entry = `## [${date}] 同步（受控）\n- 来源：SSOT.md §2 策略参数当前值\n${lines}\n- 提交：本次同步（git log 最新一条即对应）\n`;
+  const cur = fs.readFileSync(CHANGELOG, 'utf8');
+  // 新改动记在顶部（CHANGELOG 约定：倒序）：插到第一个「---」分隔线之后
+  const sep = '\n---\n';
+  const idx = cur.indexOf(sep);
+  if (idx === -1) {
+    fs.writeFileSync(CHANGELOG, cur + '\n' + entry);
+  } else {
+    const at = idx + sep.length;
+    fs.writeFileSync(CHANGELOG, cur.slice(0, at) + '\n' + entry + '\n' + cur.slice(at));
+  }
 }
 
 // ---- 主流程 ----
