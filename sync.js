@@ -72,12 +72,12 @@ function syncSchema(SSOTmap) {
     if (!(f in SSOTmap)) continue;
     const target = schemaVal(SSOTmap[f]);
     for (let i = 0; i < lines.length; i++) {
-      const lineRe = new RegExp('^\\|\\s*`' + '`' + f + '`' + '\\s*\\|[^|]*\\|\\s*`[^`]*`');
+      const lineRe = new RegExp('^\\|\\s*' + '\x60' + f + '\x60' + '\\s*\\|[^|]*\\|\\s*\x60[^\\x60]*\x60');
       const m = lines[i].match(lineRe);
       if (!m) continue;
       const oldCell = m[0].match(/`([^`]*)`\s*$/);
       if (oldCell && '`' + oldCell[1] + '`' === target) break;
-      lines[i] = lines[i].replace(/`[^`]*`\s*$/, target);
+      lines[i] = lines[i].replace(m[0], m[0].replace(/`[^`]*`\s*$/, target));
       changes.push({ file: 'schema/config.md', field: f, from: oldCell ? oldCell[1] : '?', to: SSOTmap[f].replace(/'/g, '') });
       break;
     }
