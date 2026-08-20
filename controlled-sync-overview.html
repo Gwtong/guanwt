@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管PM · 受控同步总览</title>
+<style>
+:root{
+  --bg:#F6F7F9; --panel:#FFFFFF; --ink:#2B3038; --muted:#6B7280;
+  --line:#DFE3E8; --blue:#3E5C76; --blue-soft:#EAF0F5;
+  --green:#5F8A6E; --green-soft:#EBF1ED; --amber:#B58A4C; --amber-soft:#F4ECDC;
+  --red:#B5544E; --red-soft:#F6ECEB;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.62;padding:34px 18px;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:880px;margin:0 auto;}
+header{margin-bottom:26px;}
+h1{font-size:23px;font-weight:650;letter-spacing:.5px;}
+.sub{color:var(--muted);font-size:14px;margin-top:7px;}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:22px 24px;margin-bottom:18px;}
+.card h2{font-size:15.5px;font-weight:600;margin-bottom:15px;display:flex;align-items:center;gap:9px;}
+.card h2 .tag{font-size:11px;font-weight:600;color:var(--blue);background:var(--blue-soft);
+  padding:2px 9px;border-radius:20px;letter-spacing:.5px;}
+/* timeline */
+.tl{position:relative;padding-left:22px;}
+.tl::before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:var(--line);}
+.tl li{list-style:none;position:relative;margin-bottom:13px;}
+.tl li::before{content:"";position:absolute;left:-19px;top:6px;width:10px;height:10px;border-radius:50%;
+  background:#fff;border:2px solid var(--blue);}
+.tl .t{font-weight:600;font-size:14px;}
+.tl .d{font-size:13px;color:var(--muted);margin-top:2px;}
+.tl code{background:var(--blue-soft);color:var(--blue);padding:1px 6px;border-radius:6px;font-size:12px;}
+/* callouts */
+.dua{background:var(--red-soft);border:1px solid #EAD7D5;border-radius:10px;padding:12px 14px;font-size:13.5px;margin-bottom:10px;}
+.ok{background:var(--green-soft);border:1px solid #D8E3DC;border-radius:10px;padding:12px 14px;font-size:13.5px;}
+/* work list */
+.work li{list-style:none;display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px;}
+.work li:last-child{border-bottom:none;}
+.work .b{flex:0 0 auto;font-size:11px;font-weight:600;color:#fff;background:var(--green);border-radius:6px;padding:2px 8px;margin-top:2px;}
+/* steps */
+.steps{counter-reset:s;list-style:none;}
+.steps li{counter-increment:s;position:relative;padding:11px 0 11px 40px;border-bottom:1px solid var(--line);font-size:13.5px;}
+.steps li:last-child{border-bottom:none;}
+.steps li::before{content:counter(s);position:absolute;left:0;top:10px;width:24px;height:24px;border-radius:50%;
+  background:var(--blue);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;}
+.steps code{background:var(--blue-soft);color:var(--blue);padding:1px 6px;border-radius:6px;font-size:12px;}
+.status{font-size:13px;color:var(--muted);margin-top:6px;}
+.status b{color:var(--green);}
+.note{font-size:12.5px;color:var(--muted);margin-top:12px;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:10px 12px;}
+.note code{background:#fff;color:var(--blue);padding:1px 5px;border-radius:5px;border:1px solid var(--line);font-size:11.5px;}
+footer{font-size:12px;color:var(--muted);text-align:center;margin-top:8px;}
+svg text{font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>管PM · 京东社群电商快速响应</h1>
+  <div class="sub">项目脉络 + 我做了哪些工作 + 受控同步流程图 —— 一张能看懂的全景图</div>
+</header>
+
+<!-- 脉络 -->
+<div class="card">
+  <h2><span class="tag">脉络</span>项目是怎么一步步长出来的</h2>
+  <ul class="tl">
+    <li><div class="t">起点：两课腾讯文档</div>
+      <div class="d">第一课 = AI Coding 十二步方法论；第二课 = 前后端分离（React + Express）。品牌名你定为「管PM」。</div></li>
+    <li><div class="t">① 业务与宪法</div>
+      <div class="d">产出 <code>BRD.md</code>（需求）+ <code>agents.md</code>（项目宪法：双向引用铁律）。</div></li>
+    <li><div class="t">②③ 原型 → 可用版</div>
+      <div class="d"><code>prototype/index.html</code>（4 视图）→ <code>app/index.html</code>（localStorage，6 视图，含 Welch t 检验）。</div></li>
+    <li><div class="t">④ PC 演示</div>
+      <div class="d"><code>demo-pc/index.html</code>：汇报用，已改名「管PM」并部署。</div></li>
+    <li><div class="t">⑤ 第二课实战：前后端分离</div>
+      <div class="d"><code>webapp/</code>（React + Express，localhost:3001），十步链路跑通、五页前端。</div></li>
+    <li><div class="t">⑥ 变更护栏</div>
+      <div class="d">新增 <code>SSOT.md</code>（单一事实来源）+ <code>CHANGELOG.md</code>（变更留痕）。</div></li>
+    <li><div class="t">⑦ 受控同步（本次重点）</div>
+      <div class="d">新增 <code>sync.js</code>：改 SSOT 一处 → 镜像随之变，且留痕、可回滚。</div></li>
+  </ul>
+</div>
+
+<!-- 诉求 -->
+<div class="card">
+  <h2><span class="tag">为什么</span>你提的诉求</h2>
+  <div class="dua">✗ 不要：改一处 → 无脑自动全改（链路长、易失控，最后「一团杂糅」不知道改了哪）。</div>
+  <div class="ok">✓ 要的是：改 <code>SSOT.md</code> 一处 → 其他镜像随之变，但<b>有记录、能找回</b>。</div>
+</div>
+
+<!-- 流程图 -->
+<div class="card">
+  <h2><span class="tag">流程图</span>受控同步怎么跑</h2>
+  <svg viewBox="0 0 720 300" width="100%" role="img" aria-label="受控同步流程图">
+    <defs>
+      <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L8,3 L0,6 Z" fill="#9AA3AD"/>
+      </marker>
+    </defs>
+    <!-- SSOT -->
+    <rect x="285" y="16" width="150" height="52" rx="10" fill="#EAF0F5" stroke="#3E5C76" stroke-width="1.5"/>
+    <text x="360" y="36" text-anchor="middle" font-size="14" font-weight="600" fill="#2B3038">SSOT.md §2</text>
+    <text x="360" y="54" text-anchor="middle" font-size="11" fill="#6B7280">唯一事实来源 · 你只改这里</text>
+    <!-- arrow SSOT -> sync -->
+    <line x1="360" y1="68" x2="360" y2="102" stroke="#9AA3AD" stroke-width="1.5" marker-end="url(#ah)"/>
+    <!-- sync -->
+    <rect x="278" y="104" width="164" height="52" rx="10" fill="#3E5C76" stroke="#3E5C76"/>
+    <text x="360" y="126" text-anchor="middle" font-size="14" font-weight="600" fill="#fff">node sync.js</text>
+    <text x="360" y="144" text-anchor="middle" font-size="11" fill="#DCE6EF">解析 · 同步 · 留痕 · 提交</text>
+    <!-- arrows sync -> 4 targets -->
+    <line x1="360" y1="158" x2="93"  y2="214" stroke="#9AA3AD" stroke-width="1.5" marker-end="url(#ah)"/>
+    <line x1="360" y1="158" x2="271" y2="214" stroke="#9AA3AD" stroke-width="1.5" marker-end="url(#ah)"/>
+    <line x1="360" y1="158" x2="449" y2="214" stroke="#9AA3AD" stroke-width="1.5" marker-end="url(#ah)"/>
+    <line x1="360" y1="158" x2="627" y2="214" stroke="#9AA3AD" stroke-width="1.5" marker-end="url(#ah)"/>
+    <!-- target: state.js -->
+    <rect x="18" y="216" width="150" height="68" rx="10" fill="#EAF0F5" stroke="#3E5C76"/>
+    <text x="93" y="244" text-anchor="middle" font-size="13" font-weight="600" fill="#2B3038">state.js</text>
+    <text x="93" y="264" text-anchor="middle" font-size="11" fill="#6B7280">运行时配置</text>
+    <!-- target: config.md -->
+    <rect x="196" y="216" width="150" height="68" rx="10" fill="#EAF0F5" stroke="#3E5C76"/>
+    <text x="271" y="244" text-anchor="middle" font-size="13" font-weight="600" fill="#2B3038">schema/config.md</text>
+    <text x="271" y="264" text-anchor="middle" font-size="11" fill="#6B7280">文档 schema</text>
+    <!-- target: CHANGELOG -->
+    <rect x="374" y="216" width="150" height="68" rx="10" fill="#F4ECDC" stroke="#C9A66B"/>
+    <text x="449" y="244" text-anchor="middle" font-size="13" font-weight="600" fill="#8A6D3B">CHANGELOG.md</text>
+    <text x="449" y="264" text-anchor="middle" font-size="11" fill="#A07E45">变更留痕（顶部记录）</text>
+    <!-- target: git -->
+    <rect x="552" y="216" width="150" height="68" rx="10" fill="#EBF1ED" stroke="#5F8A6E"/>
+    <text x="627" y="244" text-anchor="middle" font-size="13" font-weight="600" fill="#3F6B4F">git</text>
+    <text x="627" y="264" text-anchor="middle" font-size="11" fill="#5F8A6E">可回滚基线</text>
+  </svg>
+  <div class="note">
+    <b>回滚路径</b>：整体回退 <code>git revert &lt;hash&gt;</code> · 只还原某个文件 <code>git checkout &lt;hash&gt;^ -- &lt;文件&gt;</code><br>
+    注意：<code>git checkout -- &lt;文件&gt;</code> 是从暂存区恢复（可能停在旧值），要回到最新已提交版本请用 <code>git checkout HEAD -- &lt;文件&gt;</code>。
+  </div>
+</div>
+
+<!-- 做了什么 -->
+<div class="card">
+  <h2><span class="tag">本阶段</span>我做了哪些工作</h2>
+  <ul class="work">
+    <li><span class="b">完成</span>修复 syncSchema 正则 bug（用显式反引号 <code>\x60</code>），之前 schema 一直卡在 0.85 不改。</li>
+    <li><span class="b">完成</span>验证三处对齐：SSOT 0.80 / state.js 0.8 / schema 0.80（再跑一次 sync.js 报「无变化」）。</li>
+    <li><span class="b">完成</span>改 appendChangelog 为顶部插入，符合 CHANGELOG「倒序」约定。</li>
+    <li><span class="b">完成</span>清理临时 debug 文件，<code>.gitignore</code> 加 <code>debug*.js</code> 防再提交。</li>
+    <li><span class="b">完成</span>演示受控同步：改 tau → 三处变 + CHANGELOG 留痕 + git 提交。</li>
+    <li><span class="b">完成</span>演示回滚：git checkout 单文件还原到同步前并恢复。</li>
+  </ul>
+</div>
+
+<!-- 怎么用 -->
+<div class="card">
+  <h2><span class="tag">用法</span>你以后三步搞定</h2>
+  <ol class="steps">
+    <li>手动改 <code>SSOT.md</code> §2 里的参数（这是唯一你要动的地方）。</li>
+    <li>终端跑一句 <code>node sync.js</code>。</li>
+    <li>自动同步三处 + CHANGELOG 留痕 + git 提交；要反悔就 <code>git revert &lt;hash&gt;</code>。</li>
+  </ol>
+  <div class="status"><b>当前状态</b>：HEAD = 82100f9，三处 tau 一致，工作区干净，审计链完整（8552c80 基线 → … → 82100f9）。</div>
+</div>
+
+<footer>管PM · 京东社群快速响应 · 受控同步总览 · 2026-08-20</footer>
+</div>
+</body>
+</html>
