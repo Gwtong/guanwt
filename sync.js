@@ -105,6 +105,10 @@ function appendChangelog(allChanges) {
 
 // ---- 主流程 ----
 const map = parseSSOT();
+if (!Object.keys(map).length) {
+  console.error('[警告] 未能从 SSOT.md §2 解析出任何参数。可能是表格格式异常或混入了不可见字符。已终止，未做任何改动。');
+  process.exit(1);
+}
 const c1 = syncState(map);
 const c2 = syncSchema(map);
 const all = [...c1, ...c2];
@@ -119,7 +123,7 @@ all.forEach(c => console.log(`  ${c.file}  ${c.field}: ${c.from} → ${c.to}`));
 
 appendChangelog(all);
 execSync('git add -A', { cwd: ROOT, stdio: 'ignore' });
-execSync('git -c user.email=pm@local -c user.name=guanPM commit -q -m "sync: ' + all.map(c => c.field).join(',') + '"', { cwd: ROOT, stdio: 'ignore' });
+execSync('git -c user.email=pm@local -c user.name=guanPM commit -q -m "sync: ' + Array.from(new Set(all.map(c => c.field))).join(',') + '"', { cwd: ROOT, stdio: 'ignore' });
 const hash = execSync('git rev-parse --short HEAD', { cwd: ROOT, encoding: 'utf8' }).trim();
 
 console.log('\n✓ 已同步并提交（' + hash + '）。CHANGELOG 已追加一条记录。');
