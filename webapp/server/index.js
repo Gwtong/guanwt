@@ -171,7 +171,7 @@ app.get('/api/dashboard', (req, res) => {
   });
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 // 服务前端静态文件（React 构建产物）
 const distPath = path.join(__dirname, '../client/dist');

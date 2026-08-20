@@ -10,7 +10,7 @@ export default {
     dedup_window: 24 * 3600,
     at_switch: true,
     ai_mode: 'builtin',
-    deepseek_key: '',
+    deepseek_key: process.env.DEEPSEEK_API_KEY || '',
     deepseek_base: 'https://api.deepseek.com/v1/chat/completions',
     deepseek_model: 'deepseek-chat',
     dify_url: '',
