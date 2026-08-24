@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>京东优选 · 社群智能响应（微信仿真演示）</title>
+<style>
+:root{
+  --wx-green:#3E7C68; --wx-green-d:#2E5F50; --bubble-me:#E4EBE7; --bubble-other:#FFFFFF;
+  --ink:#23272E; --sub:#7C828C; --faint:#A8AEB8; --line:#E8EAEE;
+  --panel-bg:#F6F7F9; --nav:#222B36; --exp:#3C5870; --exp-bg:#EEF2F6;
+  --up:#A86A5C; --ok:#4E7A5A; --warn:#9A7B3F; --r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:radial-gradient(120% 90% at 50% 0%,#F1F3F6 0%,#E7EAEF 100%);color:var(--ink);
+  font-family:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+  font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1100px;margin:0 auto;padding:26px 18px 50px;display:flex;gap:26px;align-items:flex-start;justify-content:center}
+@media(max-width:880px){.wrap{flex-direction:column;align-items:center;gap:22px}}
+
+/* ============ 手机外壳 ============ */
+.phone{width:380px;flex:none;background:#fff;border-radius:30px;border:1px solid #d2d7de;
+  box-shadow:0 2px 5px rgba(30,40,55,.05) inset, 0 24px 60px rgba(30,40,55,.18);overflow:hidden;position:relative}
+.wx-top{background:linear-gradient(180deg,#FAFBFC 0%,#F1F3F6 100%);border-bottom:1px solid #E2E5E9;padding:11px 14px 10px;display:flex;align-items:center;gap:8px;box-shadow:0 1px 0 rgba(255,255,255,.7) inset}
+.wx-back{font-size:20px;color:#181818;cursor:default;width:20px}
+.wx-title{flex:1;text-align:center;font-size:15.5px;font-weight:600;color:#181818;line-height:1.25}
+.wx-title small{display:block;font-size:11px;font-weight:400;color:#9a9a9a}
+.wx-more{font-size:20px;color:#181818;width:20px;text-align:right}
+
+.wx-chat{height:560px;background:linear-gradient(180deg,#ECEEF1 0%,#E5E8EC 100%);overflow-y:auto;padding:14px 12px 8px;display:flex;flex-direction:column;gap:13px}
+.wx-chat::-webkit-scrollbar{width:0}
+.wx-time{align-self:center;font-size:11px;color:#fff;background:rgba(0,0,0,.18);padding:2px 9px;border-radius:5px;margin:2px 0}
+.wx-sys{align-self:center;max-width:88%;font-size:11.5px;color:#7d828b;background:rgba(0,0,0,.04);padding:5px 11px;border-radius:7px;text-align:center;line-height:1.5}
+
+.wx-row{display:flex;gap:9px;align-items:flex-start;max-width:100%}
+.wx-row.me{flex-direction:row-reverse}
+.av{width:38px;height:38px;border-radius:6px;flex:none;display:flex;align-items:center;justify-content:center;
+  font-size:15px;font-weight:600;color:#fff;font-family:inherit;box-shadow:0 1px 3px rgba(20,30,45,.18)}
+.wx-col{display:flex;flex-direction:column;max-width:74%}
+.wx-row.me .wx-col{align-items:flex-end}
+.wx-name{font-size:11px;color:#9a9a9a;margin:0 2px 3px}
+.bubble{position:relative;padding:8px 11px;border-radius:8px;font-size:14px;word-break:break-word;
+  background:var(--bubble-other);box-shadow:0 1px 2px rgba(20,30,45,.07), 0 3px 9px rgba(20,30,45,.05);line-height:1.5}
+.wx-row.me .bubble{background:linear-gradient(180deg,#EAF1ED 0%,#DEE9E3 100%);
+  box-shadow:0 1px 2px rgba(62,124,104,.20), 0 3px 9px rgba(62,124,104,.13)}
+.bubble::before{content:"";position:absolute;top:12px;width:0;height:0;border:6px solid transparent}
+.wx-row:not(.me) .bubble::before{left:-11px;border-right-color:var(--bubble-other)}
+.wx-row.me .bubble::before{right:-11px;border-left-color:var(--bubble-me)}
+
+/* 机器人决策气泡 */
+.bot .bubble{background:#fff;border:1px solid #e3e8ef;box-shadow:0 1px 2px rgba(20,30,45,.05), 0 4px 12px rgba(20,30,45,.04)}
+.bot .bubble::before{border-right-color:#fff}
+.bot-tag{display:inline-block;font-size:10px;font-weight:700;color:var(--wx-green);
+  background:#E6F1EA;border-radius:4px;padding:1px 6px;margin-bottom:5px}
+.bot-tag-off{color:var(--faint);background:#EDEEF0}
+.verdict-push{color:var(--ok);font-weight:600}
+.verdict-hold{color:var(--warn);font-weight:600}
+.verdict-block{color:var(--up);font-weight:600}
+.pcard{margin-top:8px;border:1px solid #eaeef2;border-radius:9px;overflow:hidden;background:#fafbfc;box-shadow:0 2px 10px rgba(20,30,45,.07)}
+.pcard .pc-top{display:flex;gap:10px;padding:9px 10px;align-items:center}
+.pc-thumb{width:42px;height:42px;border-radius:7px;background:#f0f2f5;display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}
+.pc-nm{font-size:13px;font-weight:600;line-height:1.3}
+.pc-meta{font-size:11px;color:var(--sub);margin-top:1px}
+.pc-pr{font-size:16px;font-weight:700;color:var(--up);margin-left:auto;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pc-pr small{font-size:10px;font-weight:400;color:var(--sub)}
+.pc-ft{background:#f3f6f9;font-size:11px;color:var(--sub);padding:6px 10px;border-top:1px solid #eef1f4}
+.pc-buy{margin-top:8px;background:var(--wx-green);color:#fff;text-align:center;border-radius:7px;padding:7px;font-size:12.5px;font-weight:600;cursor:pointer;user-select:none}
+.pc-buy:active{opacity:.82}
+
+/* 输入区 */
+.wx-input{background:#F1F3F6;border-top:1px solid #E2E5E9;padding:10px 11px;display:flex;gap:8px;align-items:center;position:relative;box-shadow:inset 0 1px 0 rgba(0,0,0,.04)}
+.wx-input input{flex:1;border:none;background:#fff;border-radius:8px;padding:9px 11px;font-size:14px;font-family:inherit;outline:none;box-shadow:0 1px 2px rgba(30,40,55,.04)}
+.wx-input input:focus{box-shadow:0 0 0 2px rgba(62,124,104,.20)}
+.wx-send{background:var(--wx-green);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:14px;
+  font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;flex:none}
+.wx-send:hover{background:var(--wx-green-d)}
+.wx-send:disabled{opacity:.5;cursor:not-allowed}
+
+/* @ 提及浮层（仿微信：输入 @ 弹出候选，点击/回车补全，免手敲全名） */
+.mention-pop{position:absolute;left:10px;right:66px;bottom:calc(100% + 6px);background:#fff;border:1px solid var(--line);
+  border-radius:10px;box-shadow:0 10px 30px rgba(30,42,56,.18);overflow:hidden;z-index:30;display:none}
+.mention-item{display:flex;align-items:center;gap:7px;padding:9px 12px;font-size:13.5px;color:var(--ink);cursor:pointer;transition:.1s}
+.mention-item:hover,.mention-item.active{background:#f0f3f2}
+.mention-item .at{color:var(--wx-green);font-weight:700}
+.mention-item .mi-sub{margin-left:auto;font-size:11px;color:var(--sub)}
+.presets-wrap{background:#F6F7F9;border-top:1px solid #E8EAEE;overflow:hidden}
+.presets-toggle{width:100%;text-align:left;background:transparent;border:none;padding:9px 12px;
+  font-size:12px;color:var(--sub);cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;letter-spacing:.3px}
+.presets-toggle:hover{color:var(--ink)}
+.presets-toggle .chev{transition:transform .22s ease;font-size:13px;line-height:1}
+.presets-wrap.open .chev{transform:rotate(90deg)}
+.presets{max-height:0;padding:0 10px;display:flex;gap:6px;flex-wrap:wrap;transition:max-height .26s ease,padding .26s ease;opacity:0}
+.presets-wrap.open .presets{max-height:150px;padding:2px 10px 11px;opacity:1}
+.chip{font-size:12px;color:#3a3f47;background:#fff;border:1px solid #e2e2e2;border-radius:8px;padding:5px 11px;cursor:pointer;transition:.15s;white-space:nowrap}
+.chip:hover{border-color:var(--wx-green);color:var(--wx-green);background:#f3f9f5}
+
+/* 多群切换条（演示"多个群同时监测"） */
+.group-bar{display:flex;gap:6px;padding:8px 10px;background:#F4F6F8;border-bottom:1px solid #E8EAEE;overflow-x:auto}
+.group-bar::-webkit-scrollbar{width:0;height:0}
+.gchip{font-size:11px;color:var(--sub);background:#fff;border:1px solid #E2E5E9;border-radius:999px;padding:4px 10px;cursor:pointer;white-space:nowrap;transition:.15s;flex:none}
+.gchip:hover{border-color:var(--wx-green);color:var(--wx-green)}
+.gchip.on{background:var(--wx-green);border-color:var(--wx-green);color:#fff;font-weight:600}
+.gbar-spacer{flex:1}
+
+/* 测试集（一键自测，默认折叠） */
+.test-wrap{background:#F6F7F9;border-top:1px solid #E8EAEE;overflow:hidden}
+.test-toggle{width:100%;text-align:left;background:transparent;border:none;padding:9px 12px;font-size:12px;color:var(--sub);cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;letter-spacing:.3px}
+.test-toggle:hover{color:var(--ink)}
+.test-toggle .chev{transition:transform .22s ease;font-size:13px;line-height:1}
+.test-wrap.open .chev{transform:rotate(90deg)}
+.test-body{max-height:0;padding:0 10px;overflow:hidden;transition:max-height .26s ease,padding .26s ease;opacity:0}
+.test-wrap.open .test-body{max-height:460px;padding:2px 10px 11px;opacity:1}
+.test-run{width:100%;background:var(--wx-green);color:#fff;border:none;border-radius:8px;padding:8px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.test-run:hover{background:var(--wx-green-d)}
+.test-res{margin-top:8px;font-size:11.5px;line-height:1.7;max-height:280px;overflow-y:auto}
+.test-res .row{display:flex;gap:6px;align-items:flex-start;padding:3px 0;border-bottom:1px dashed #EDEFF2}
+.test-res .ok{color:var(--ok);font-weight:700}
+.test-res .no{color:var(--up);font-weight:700}
+.test-res .tt{color:var(--sub);flex:1;min-width:0}
+
+/* 线上中台联通状态 */
+.sync-note{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--sub);margin-top:10px;padding:7px 11px;background:#F6F8FA;border:1px solid var(--line);border-radius:8px;letter-spacing:.2px}
+.sync-note .dot{width:7px;height:7px;border-radius:50%;flex:none}
+.sync-note.on .dot{background:var(--ok);box-shadow:0 0 0 3px rgba(94,138,111,.18)}
+.sync-note:not(.on) .dot{background:var(--faint)}
+.typing{display:flex;gap:4px;padding:10px 12px}
+.typing i{width:7px;height:7px;border-radius:50%;background:#c3c7cd;animation:blink 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,60%,100%{opacity:.3}30%{opacity:1}}
+
+/* ============ 幕后链路面板 ============ */
+.side{width:470px;flex:none;background:#fff;border-radius:16px;box-shadow:0 12px 34px rgba(20,30,45,.10);
+  overflow:hidden;border:1px solid #eef0f3}
+.side-h{padding:15px 18px;border-bottom:1px solid var(--line);background:var(--nav);color:#fff}
+.side-h b{font-size:15px;font-weight:600}
+.side-h p{font-size:11.5px;color:#aeb9c6;margin-top:3px}
+.side-b{padding:14px 16px 18px;max-height:600px;overflow-y:auto}
+.side-b::-webkit-scrollbar{width:6px}.side-b::-webkit-scrollbar-thumb{background:#d6dbe1;border-radius:3px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.kpi{background:var(--panel-bg);border:1px solid var(--line);border-radius:9px;padding:8px 6px;text-align:center}
+.kpi .l{font-size:10.5px;color:var(--sub)}
+.kpi .v{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:1px}
+
+.steps{display:flex;flex-direction:column;gap:7px}
+.step{display:flex;gap:11px;align-items:flex-start;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;transition:.2s}
+.step.on{border-color:var(--exp);background:var(--exp-bg)}
+.step.skip{opacity:.5}
+.step .num{width:24px;height:24px;border-radius:50%;flex:none;background:#eef1f4;color:#7a828c;
+  font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.step.on .num{background:var(--exp);color:#fff}
+.step .body{flex:1;min-width:0}
+.step .st{display:flex;align-items:center;gap:7px}
+.step .st b{font-size:12.5px;font-weight:600}
+.step .badge{font-size:10px;font-weight:700;border-radius:4px;padding:1px 6px}
+.b-pass{color:var(--ok);background:#eaf3ed}.b-skip{color:var(--sub);background:#f1f1ee}
+.b-push{color:#fff;background:var(--ok)}.b-hold{color:#fff;background:var(--warn)}.b-block{color:#fff;background:var(--up)}
+.step .dt{font-size:11.5px;color:var(--sub);margin-top:3px;line-height:1.5}
+.step .dt code{background:#f3f5f8;color:#3a4654;border-radius:4px;padding:0 4px;font-size:11px}
+
+.verdict-box{margin-top:14px;border-radius:11px;padding:13px 14px;border:1px solid}
+.vb-push{background:#eef6f0;border-color:#cfe6d6}
+.vb-hold{background:#faf5e9;border-color:#ecdcb8}
+.vb-block{background:#fbeeea;border-color:#f0d3c9}
+.verdict-box .vt{font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px}
+.verdict-box .vd{font-size:12px;color:#5a626b;margin-top:5px;line-height:1.55}
+.legend-note{font-size:11px;color:var(--faint);margin-top:12px;line-height:1.6;border-top:1px dashed var(--line);padding-top:9px}
+.btn-reset{margin-top:12px;width:100%;background:#fff;border:1px solid var(--line);border-radius:9px;
+  padding:9px;font-size:12.5px;color:var(--ink);cursor:pointer;font-family:inherit}
+.btn-reset:hover{background:#fafafa}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- 假微信：社群群聊 -->
+  <div class="phone">
+    <div class="wx-top">
+      <div class="wx-back">‹</div>
+      <div class="wx-title">京东优选·幸福里小区邻居群<small>213人 · 实验组 · 活跃群</small></div>
+      <div class="wx-more">···</div>
+    </div>
+    <div class="group-bar" id="groupBar"></div>
+    <div class="wx-chat" id="chat"></div>
+    <div class="presets-wrap" id="presetsWrap">
+      <button class="presets-toggle" id="presetsToggle">示例话术 <span class="chev">›</span></button>
+      <div class="presets" id="presets"></div>
+    </div>
+    <div class="wx-input">
+      <div class="mention-pop" id="mentionPop"></div>
+      <input id="msgInput" placeholder="在群里说一句带需求的话，看平台要不要推商品…" autocomplete="off">
+      <button class="wx-send" id="sendBtn">发送</button>
+    </div>
+  </div>
+
+  <!-- 幕后面板：平台 10 步处理链路 -->
+  <div class="side">
+    <div class="side-h">
+      <b>平台幕后链路 · 实时透视</b>
+      <p>你发的每一条消息，都会走完这套「京东社群智能响应」十步主链路</p>
+    </div>
+    <div class="side-b">
+      <div class="kpis" id="kpis"></div>
+      <div class="steps" id="steps"></div>
+      <div id="verdictBox"></div>
+      <button class="btn-reset" id="resetBtn">↺ 重置对话与计数</button>
+      <div class="sync-note" id="syncStatus"><span class="dot"></span>正在检测线上中台连接…</div>
+      <div class="test-wrap" id="testWrap">
+        <button class="test-toggle" id="testToggle">🧪 测试集 · 一键自测 <span class="chev">›</span></button>
+        <div class="test-body">
+          <button class="test-run" id="testRunBtn">▶ 跑全部 12 条用例（自动演示 + 判定对错）</button>
+          <div class="test-res" id="testRes"></div>
+        </div>
+      </div>
+      <div class="legend-note">
+        判断引擎与线上真平台（Railway 部署）完全一致：前置过滤 → 相关性阈值 τ=0.85 → 意图解析 → 艾特矩阵分流 → 按品类选品。<br>
+        <strong>开放选品</strong>：商品池（113 款）之外的任意商品，系统也能识别实体、自动生成卡片并推送，面试可随手说任何东西。<br>
+        当前为<strong>离线内置引擎</strong>，断网/后端波动均不影响演示。接真 DeepSeek 后，④⑤步会替换为大模型判定，结论口径不变。
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===================== 数据 ===================== */
+const PRODUCTS = [
+  {id:"S001",name:"和田玉枣 500g 大红枣",cat:"枣",price:29.9,comm:10},
+  {id:"S002",name:"好想你 枣片 免洗 200g",cat:"枣",price:19.9,comm:8},
+  {id:"S003",name:"格力 落地扇 3档风速",cat:"风扇",price:199,comm:8},
+  {id:"S004",name:"美的 塔扇 遥控款",cat:"风扇",price:239,comm:7},
+  {id:"S005",name:"维达 抽纸 24包整箱",cat:"纸品",price:39.9,comm:10},
+  {id:"S006",name:"清风 原木抽纸 30包",cat:"纸品",price:45.8,comm:10},
+  {id:"S007",name:"美的 电饭煲 4L 智能预约",cat:"厨电",price:299,comm:6},
+  {id:"S008",name:"苏泊尔 电饭煲 4L 球釜",cat:"厨电",price:259,comm:6},
+  {id:"S009",name:"膳魔师 保温杯 500ml",cat:"水杯",price:129,comm:12},
+  {id:"S010",name:"象印 儿童保温杯 450ml",cat:"水杯",price:149,comm:11},
+  {id:"S011",name:"蓝月亮 洗衣液 12斤",cat:"家清",price:49.9,comm:9},
+  {id:"S012",name:"立白 洗衣凝珠 80颗",cat:"家清",price:59.9,comm:9},
+  {id:"S013",name:"水星家纺 夏凉被 1.5m",cat:"家纺",price:89,comm:10},
+  {id:"S014",name:"天语 老人机 大字大声",cat:"手机",price:199,comm:5},
+  {id:"S015",name:"皇家 室内成猫粮 4kg",cat:"猫粮",price:159,comm:8},
+  {id:"S016",name:"网易严选 无谷猫粮 1.8kg",cat:"猫粮",price:89,comm:8},
+  {id:"S017",name:"十月稻田 长粒香米 5kg",cat:"米面",price:39.9,comm:7},
+  {id:"S018",name:"金龙鱼 丝苗米 5kg",cat:"米面",price:34.9,comm:6},
+  {id:"S019",name:"韩国进口 火鸡面 5连包 辣味",cat:"零食",price:29.9,comm:10},
+  {id:"S020",name:"卫龙 大面筋辣条 106g",cat:"零食",price:9.9,comm:11},
+  {id:"S021",name:"乐事 薯片 罐装 104g",cat:"零食",price:12.9,comm:9},
+  /* —— 以下为扩展商品（保留 S001–S021 顺序不变，全部追加其后，历史卡片引用不受影响）—— */
+  /* 水果 */
+  {id:"S022",name:"烟台红富士苹果 5斤",cat:"水果",price:39.9,comm:8},
+  {id:"S023",name:"赣南脐橙 5斤",cat:"水果",price:29.9,comm:8},
+  {id:"S024",name:"海南香蕉 3斤",cat:"水果",price:16.9,comm:9},
+  {id:"S025",name:"智利车厘子 2斤",cat:"水果",price:89,comm:7},
+  {id:"S026",name:"云南蓝莓 125g*4盒",cat:"水果",price:45,comm:8},
+  {id:"S027",name:"红心猕猴桃 12枚",cat:"水果",price:35.9,comm:9},
+  {id:"S028",name:"越南火龙果 3个",cat:"水果",price:19.9,comm:9},
+  /* 饮料 */
+  {id:"S029",name:"可口可乐 330ml*24",cat:"饮料",price:49.9,comm:6},
+  {id:"S030",name:"农夫山泉 550ml*24",cat:"饮料",price:29.9,comm:6},
+  {id:"S031",name:"味全每日C 果汁 300ml*6",cat:"饮料",price:39.9,comm:8},
+  {id:"S032",name:"三顿半 速溶咖啡 24颗",cat:"饮料",price:99,comm:10},
+  {id:"S033",name:"蒙牛纯牛奶 250ml*12",cat:"饮料",price:59,comm:7},
+  {id:"S034",name:"安慕希酸奶 205g*10",cat:"饮料",price:69,comm:8},
+  {id:"S035",name:"东方树叶 茶饮 500ml*6",cat:"饮料",price:35,comm:7},
+  {id:"S036",name:"青岛啤酒 330ml*6",cat:"饮料",price:45,comm:6},
+  /* 零食（扩充） */
+  {id:"S037",name:"三只松鼠 每日坚果 30袋",cat:"零食",price:69,comm:10},
+  {id:"S038",name:"奥利奥 夹心饼干",cat:"零食",price:19.9,comm:9},
+  {id:"S039",name:"德芙 巧克力 252g",cat:"零食",price:49.9,comm:9},
+  {id:"S040",name:"旺旺 雪饼",cat:"零食",price:14.9,comm:10},
+  {id:"S041",name:"良品铺子 猪肉脯",cat:"零食",price:25.9,comm:10},
+  /* 米面调味 */
+  {id:"S042",name:"陈克明 挂面 1kg",cat:"米面",price:12.9,comm:8},
+  {id:"S043",name:"金龙鱼 调和油 5L",cat:"米面",price:69.9,comm:6},
+  {id:"S044",name:"海天 酱油 500ml",cat:"米面",price:15.9,comm:8},
+  {id:"S045",name:"恒顺 香醋 500ml",cat:"米面",price:12.9,comm:8},
+  {id:"S046",name:"海天 蚝油",cat:"米面",price:13.9,comm:8},
+  /* 速食/早餐 */
+  {id:"S047",name:"康师傅 红烧牛肉面 12桶",cat:"速食",price:39.9,comm:7},
+  {id:"S048",name:"湾仔码头 速冻水饺 1kg",cat:"速食",price:39.9,comm:7},
+  {id:"S049",name:"桃李 面包",cat:"速食",price:13.9,comm:9},
+  {id:"S050",name:"桂格 燕麦片",cat:"速食",price:29.9,comm:8},
+  {id:"S051",name:"自嗨锅 自热火锅",cat:"速食",price:29.9,comm:8},
+  /* 生鲜 */
+  {id:"S052",name:"正大 鸡蛋 30枚",cat:"生鲜",price:29.9,comm:7},
+  {id:"S053",name:"圣农 鸡胸肉 1kg",cat:"生鲜",price:25.9,comm:8},
+  {id:"S054",name:"有机蔬菜 每周套餐",cat:"生鲜",price:39.9,comm:8},
+  /* 家清（扩充） */
+  {id:"S055",name:"心相印 卷纸 27卷",cat:"家清",price:59.9,comm:9},
+  {id:"S056",name:"洁成 垃圾袋 加厚",cat:"家清",price:9.9,comm:10},
+  {id:"S057",name:"立白 洗洁精",cat:"家清",price:14.9,comm:9},
+  {id:"S058",name:"威猛先生 洁厕灵",cat:"家清",price:19.9,comm:9},
+  {id:"S059",name:"滴露 消毒液",cat:"家清",price:39.9,comm:8},
+  /* 厨具 */
+  {id:"S060",name:"苏泊尔 不粘炒锅",cat:"厨具",price:129,comm:7},
+  {id:"S061",name:"张小泉 菜刀",cat:"厨具",price:99,comm:7},
+  {id:"S062",name:"双枪 砧板 整木",cat:"厨具",price:59,comm:8},
+  {id:"S063",name:"摩飞 电热水壶",cat:"厨具",price:159,comm:7},
+  {id:"S064",name:"乐扣 保鲜盒 套装",cat:"厨具",price:89,comm:8},
+  /* 家纺（扩充） */
+  {id:"S065",name:"富安娜 枕头",cat:"家纺",price:79,comm:9},
+  {id:"S066",name:"南极人 四件套",cat:"家纺",price:159,comm:8},
+  {id:"S067",name:"洁丽雅 纯棉毛巾",cat:"家纺",price:29.9,comm:9},
+  {id:"S068",name:"喜临门 床垫",cat:"家纺",price:599,comm:5},
+  /* 家电 */
+  {id:"S069",name:"小米 加湿器",cat:"家电",price:199,comm:7},
+  {id:"S070",name:"戴森 吹风机",cat:"家电",price:2999,comm:4},
+  {id:"S071",name:"科沃斯 扫地机器人",cat:"家电",price:1999,comm:5},
+  {id:"S072",name:"欧普 台灯",cat:"家电",price:129,comm:8},
+  {id:"S073",name:"九阳 破壁机",cat:"家电",price:399,comm:6},
+  /* 水杯（扩充） */
+  {id:"S074",name:"富光 玻璃杯",cat:"水杯",price:25.9,comm:9},
+  /* 收纳 */
+  {id:"S075",name:"太力 收纳箱 透明",cat:"收纳",price:39.9,comm:8},
+  {id:"S076",name:"宜家风 衣架 10只",cat:"收纳",price:29.9,comm:9},
+  /* 卫浴 */
+  {id:"S077",name:"洁丽雅 浴巾 加厚",cat:"卫浴",price:39.9,comm:9},
+  {id:"S078",name:"居家 拖鞋 防滑",cat:"卫浴",price:19.9,comm:10},
+  /* 数码 */
+  {id:"S079",name:"华为 FreeBuds 耳机",cat:"数码",price:499,comm:6},
+  {id:"S080",name:"小米 充电宝 20000mAh",cat:"数码",price:129,comm:8},
+  {id:"S081",name:"绿联 数据线",cat:"数码",price:29.9,comm:9},
+  {id:"S082",name:"漫步者 蓝牙音箱",cat:"数码",price:199,comm:7},
+  /* 服饰 */
+  {id:"S083",name:"优衣库 男士T恤",cat:"服饰",price:79,comm:8},
+  {id:"S084",name:"海澜之家 衬衫",cat:"服饰",price:129,comm:7},
+  {id:"S085",name:"太平鸟 卫衣",cat:"服饰",price:299,comm:6},
+  {id:"S086",name:"波司登 羽绒外套",cat:"服饰",price:599,comm:5},
+  {id:"S087",name:"李维斯 牛仔裤",cat:"服饰",price:399,comm:6},
+  {id:"S088",name:"优衣库 运动裤",cat:"服饰",price:149,comm:7},
+  {id:"S089",name:"ZARA 半身裙",cat:"服饰",price:199,comm:6},
+  {id:"S090",name:"耐克 运动鞋",cat:"服饰",price:499,comm:6},
+  {id:"S091",name:"回力 帆布鞋",cat:"服饰",price:99,comm:9},
+  {id:"S092",name:"蕉内 内衣",cat:"服饰",price:129,comm:8},
+  {id:"S093",name:"浪莎 袜子 5双",cat:"服饰",price:39.9,comm:9},
+  {id:"S094",name:"纽亦特 帽子",cat:"服饰",price:59,comm:9},
+  {id:"S095",name:"鄂尔多斯 围巾",cat:"服饰",price:299,comm:6},
+  /* 个护 */
+  {id:"S096",name:"海飞丝 洗发水",cat:"个护",price:49.9,comm:8},
+  {id:"S097",name:"多芬 沐浴露",cat:"个护",price:45,comm:8},
+  {id:"S098",name:"云南白药 牙膏",cat:"个护",price:29.9,comm:9},
+  {id:"S099",name:"欧乐B 牙刷",cat:"个护",price:39,comm:8},
+  /* 美妆 */
+  {id:"S100",name:"完美日记 口红",cat:"美妆",price:69,comm:10},
+  {id:"S101",name:"敷尔佳 面膜",cat:"美妆",price:99,comm:9},
+  {id:"S102",name:"雅诗兰黛 粉底液",cat:"美妆",price:420,comm:5},
+  /* 文体 */
+  {id:"S103",name:"斯伯丁 篮球",cat:"文体",price:199,comm:7},
+  {id:"S104",name:"迪卡侬 瑜伽垫",cat:"文体",price:79,comm:9},
+  {id:"S105",name:"李宁 羽毛球拍",cat:"文体",price:159,comm:8},
+  {id:"S106",name:"得力 笔记本",cat:"文体",price:19.9,comm:10},
+  {id:"S107",name:"商务印书馆 图书",cat:"文体",price:49,comm:9},
+  /* 保健 */
+  {id:"S108",name:"汤臣倍健 维生素C",cat:"保健",price:89,comm:8},
+  {id:"S109",name:"钙尔奇 钙片",cat:"保健",price:69,comm:8},
+  {id:"S110",name:"中宁 枸杞",cat:"保健",price:39.9,comm:9},
+  /* 宠物（沿用旧 cat 名「猫粮」以保证历史引用一致） */
+  {id:"S111",name:"皇家 狗粮 10kg",cat:"猫粮",price:199,comm:7},
+  {id:"S112",name:"洁客 猫砂 6L",cat:"猫粮",price:59,comm:8},
+  {id:"S113",name:"麦富迪 宠物零食",cat:"猫粮",price:29.9,comm:10},
+];
+const RULE_MAP = [
+  {cats:['枣','红枣','大枣','枣子'],cat:'枣'},
+  {cats:['风扇','电风扇','落地扇','塔扇'],cat:'风扇'},
+  {cats:['纸巾','抽纸','卷纸'],cat:'纸品'},
+  {cats:['电饭煲','电饭锅','高压锅'],cat:'厨电'},
+  {cats:['保温杯','水杯','杯子','玻璃杯'],cat:'水杯'},
+  {cats:['洗衣液','凝珠','洗洁精','垃圾袋','洁厕','消毒液','消毒'],cat:'家清'},
+  {cats:['被子','凉被','四件套','枕头','毛巾','床垫'],cat:'家纺'},
+  {cats:['手机','老人机','备用机'],cat:'手机'},
+  {cats:['猫粮','狗粮','猫砂','宠物','宠物零食'],cat:'猫粮'},
+  {cats:['米','大米','香米','挂面','面条','油','酱油','醋','蚝油','调味'],cat:'米面'},
+  {cats:['火鸡面','泡面','方便面','辣条','薯片','零食','饼干','坚果','巧克力','糖果','雪饼','猪肉脯'],cat:'零食'},
+  {cats:['苹果','脐橙','橙子','香蕉','车厘子','蓝莓','猕猴桃','火龙果','水果'],cat:'水果'},
+  {cats:['可乐','矿泉水','果汁','咖啡','牛奶','酸奶','茶','啤酒','饮料'],cat:'饮料'},
+  {cats:['水饺','饺子','面包','燕麦','麦片','自热','速食'],cat:'速食'},
+  {cats:['鸡蛋','鸡胸肉','蔬菜','生鲜','肉'],cat:'生鲜'},
+  {cats:['炒锅','菜刀','砧板','水壶','保鲜盒','锅','刀','碗','筷'],cat:'厨具'},
+  {cats:['加湿器','吹风机','扫地','台灯','破壁','家电'],cat:'家电'},
+  {cats:['收纳','衣架'],cat:'收纳'},
+  {cats:['浴巾','拖鞋','卫浴'],cat:'卫浴'},
+  {cats:['耳机','充电宝','数据线','音箱','数码','电脑','平板'],cat:'数码'},
+  {cats:['T恤','衬衫','卫衣','外套','牛仔裤','运动裤','裙子','运动鞋','帆布鞋','内衣','袜子','帽子','围巾','衣服','裤子','鞋','服饰'],cat:'服饰'},
+  {cats:['洗发水','沐浴露','牙膏','牙刷','个护'],cat:'个护'},
+  {cats:['口红','面膜','粉底','美妆','妆'],cat:'美妆'},
+  {cats:['篮球','瑜伽垫','羽毛球','跳绳','书','笔','笔记本','玩具'],cat:'文体'},
+  {cats:['维生素','钙片','枸杞','保健','养生'],cat:'保健'},
+];
+const COMPLAINT_MARKERS = ['不好用','不甜','不好吃','坏了','假货','差评','退货'];
+const TAU = 0.85;
+
+/* 数量 + 实体抽取（让模型能识别你话里说的任意商品名与数量，不只火鸡面） */
+const QTY_UNITS='样|个|袋|箱|瓶|份|包|件|盒|斤|桶|罐|支|条|双|副|把|本|辆|张|顶';
+const QTY_NUM='\\d+|两|二|三|四|五|六|七|八|九|十';
+const STOP_ENTITY=['东西','玩意','那个','这个','什么','点啥','一些','一个','别的','它'];
+function extractQty(t){
+  const m=t.match(new RegExp('('+QTY_NUM+')\\s*('+QTY_UNITS+')'));
+  if(!m) return null;
+  const map={两:2,二:2,三:3,四:4,五:5,六:6,七:7,八:8,九:9,十:10};
+  const n=/\d+/.test(m[1])?parseInt(m[1],10):map[m[1]];
+  return {n,unit:m[2]};
+}
+function extractEntity(t){
+  let s=t.replace(/@\S+\s?/g,'')
+    .replace(new RegExp('('+QTY_NUM+')\\s*('+QTY_UNITS+')'),'')
+    .replace(/我想|我要|帮我|给我|帮我看|帮我看看|看看|看下|看一下|看|找下|找|搜下|搜|查下|查|查询|问下|问|询|有没有|有吗|有啥|有活动|求推荐|推荐一下|推荐|哪个好|挑个|挑|选个|选|想买|要买|买点|买|下单|囤点|来点|多少钱|便宜点|便宜的|性价比|划算|以内|元以内|百元以内|一下|可以吗|可以|吗|呢|吧|啊|呀|哦|的|点啥|一些|一个|那个|这个|要|想|来|整|弄|搞|弄个|搞个|来个|整点|整一个|弄一个|搞一个|件|套/g,'')
+    .replace(new RegExp('('+QTY_UNITS+')','g'),'')   // 清残留量词（如「个台灯」→「台灯」）
+    .replace(/[\s,，。、！!？?]/g,'').trim();
+  if(!s||STOP_ENTITY.includes(s)) return '';
+  return s.length<=14?s:'';
+}
+/* 实体质量闸门：防止把"出去玩/哪里/吃什么"等非商品话也当成商品推送 */
+const NON_PRODUCT_RE=/出去玩|出去|哪里|哪儿|什么地方|啥地方|去哪|去哪里|好玩|玩什么|有啥好玩|攻略|路线|附近|周边|地方|饭馆|餐厅|吃什么|吃啥|好吃的|看电影|电影|天气|时间|什么时候|怎么样|咋样|怎么办|怎么|办法|方法|服务|找人|找谁|装修|家政|保洁|课程|报名|预约|挂号|公交|地铁|停车|电影票|门票|景区|旅行|旅游|出差|上学|上班|公园|商场/;
+function looksLikeProduct(ent){
+  if(!ent) return false;
+  if(STOP_ENTITY.includes(ent)) return false;
+  if(/^(玩|吃|喝|去|看|问|找|逛|地方|哪里|啥|怎么|咋|出门|事情|事儿)$/.test(ent)) return false;
+  if(NON_PRODUCT_RE.test(ent)) return false;
+  return true;
+}
+
+/* 开放选品：面试官随手说的任何商品，都生成一个合理、稳定的商品卡片（价格/佣金/品类） */
+function guessCat(ent){
+  if(/灯|枕|被|床|沙发|桌|椅|收纳|杯|锅|碗|筷|衣|裤|鞋|帽|包|巾|纸|桶|架|垫|镜|锁|钩/.test(ent)) return '家居日用';
+  if(/手机|电脑|耳机|充电|数据|键盘|鼠标|相机|平板|路由|音箱|线|器/.test(ent)) return '数码电器';
+  if(/零食|吃|果|饮|米|面|肉|奶|茶|水|酒|糖|蛋糕|菜/.test(ent)) return '食品生鲜';
+  if(/玩|书|笔|本|画|积木|球|运动|棋|吉他|钢琴|拍/.test(ent)) return '文体玩具';
+  if(/霜|液|膏|粉|膜|洗|护|妆|口红|眉|甲|香/.test(ent)) return '个护美妆';
+  if(/药|维|钙|保健|养生/.test(ent)) return '健康保健';
+  return '生活好物';
+}
+function makeLongtailProduct(ent, catHint){
+  let h=0; for(let i=0;i<ent.length;i++) h=(h*31+ent.charCodeAt(i))>>>0;
+  const price=Math.round((9.9 + (h%2900)/10) * 10)/10;   // 稳定落在 9.9 ~ 299.8
+  const comm=5 + ((h>>>3)%11);                             // 稳定落在 5% ~ 15%（无符号位移，避免个别字串算出 0）
+  const cat=catHint || guessCat(ent);
+  return {id:'LT', name:ent, cat, price, comm, longtail:true};
+}
+
+/* 商品卡通图标：名称关键词优先（最贴切），其次品类兜底，再兜底通用箱。
+   纯 emoji，离线零依赖，卡通风格，对应"你发的那个东西大概的样子"。 */
+const ICON_RULES = [
+  ['火鸡面','🍜'],['泡面','🍜'],['方便面','🍜'],['韩国进口','🍜'],['辛拉面','🍜'],
+  ['辣条','🌶️'],['卫龙','🌶️'],['辣','🌶️'],
+  ['薯片','🥔'],['乐事','🥔'],['坚果','🥜'],['饼干','🍪'],['巧克力','🍫'],['糖果','🍬'],['雪饼','🍘'],['猪肉脯','🥩'],
+  ['枣','🌰'],['和田玉枣','🌰'],['好想你','🌰'],
+  ['苹果','🍎'],['脐橙','🍊'],['橙子','🍊'],['香蕉','🍌'],['车厘子','🍒'],['蓝莓','🫐'],['猕猴桃','🥝'],['火龙果','🐉'],
+  ['可乐','🥤'],['矿泉水','💧'],['果汁','🧃'],['咖啡','☕'],['牛奶','🥛'],['酸奶','🥛'],['茶','🍵'],['啤酒','🍺'],
+  ['耳机','🎧'],['蓝牙','🎧'],['充电宝','🔋'],['数据线','🔌'],['音箱','🔊'],
+  ['保温杯','🥤'],['水杯','🥤'],['杯子','🥤'],['膳魔师','🥤'],['象印','🥤'],
+  ['猫粮','🐱'],['狗粮','🐶'],['猫砂','🐱'],['皇家','🐱'],['网易严选','🐱'],
+  ['洗衣液','🧴'],['洗洁精','🧴'],['蓝月亮','🧴'],['立白','🧴'],['凝珠','🧴'],['洁厕','🧴'],['消毒','🧴'],
+  ['电饭煲','🍚'],['电饭锅','🍚'],['高压锅','🍚'],['美的','🍚'],['苏泊尔','🍚'],
+  ['风扇','🌀'],['落地扇','🌀'],['塔扇','🌀'],['格力','🌀'],
+  ['瑜伽垫','🧘'],['篮球','🏀'],['羽毛球','🏸'],['跳绳','🪢'],['书','📚'],['笔记本','📓'],
+  ['口红','💄'],['面膜','🧖'],['粉底','💄'],['美妆','💄'],
+  ['洗发水','🧴'],['沐浴露','🧴'],['牙膏','🪥'],['牙刷','🪥'],
+  ['T恤','👕'],['衬衫','👔'],['卫衣','🧥'],['外套','🧥'],['牛仔裤','👖'],['运动裤','👖'],['裙子','👗'],
+  ['运动鞋','👟'],['帆布鞋','👟'],['内衣','🩲'],['袜子','🧦'],['帽子','🧢'],['围巾','🧣'],
+  ['扫地','🤖'],['台灯','💡'],['加湿器','💧'],['吹风机','💨'],['破壁','🥤'],
+  ['维生素','💊'],['钙片','💊'],['枸杞','🍒'],
+  ['鸡蛋','🥚'],['鸡胸肉','🍗'],['蔬菜','🥬'],
+  ['纸巾','🧻'],['抽纸','🧻'],['维达','🧻'],['清风','🧻'],['卫生纸','🧻'],
+  ['炒锅','🍳'],['菜刀','🔪'],['砧板','🪵'],['水壶','🫖'],
+  ['枕','🛏️'],['被','🛏️'],['四件套','🛏️'],['毛巾','🧻'],['床垫','🛏️'],['家纺','🛏️'],
+  ['手机','📱'],['老人机','📱'],['天语','📱'],
+  ['挂面','🍜'],['面条','🍜'],['油','🫒'],['酱油','🫗'],['醋','🫗'],['蚝油','🫗'],
+  ['水饺','🥟'],['饺子','🥟'],['面包','🍞'],['燕麦','🥣'],['自热','🍲'],
+  ['收纳','📦'],['衣架','🧺'],['浴巾','🧻'],['拖鞋','🩴'],['卫浴','🚿'],
+];
+const CAT_EMOJI = {
+  '枣':'🌰','风扇':'🌀','纸品':'🧻','厨电':'🍚','水杯':'🥤','家清':'🧴','家纺':'🛏️','手机':'📱',
+  '猫粮':'🐱','米面':'🌾','零食':'🍪','水果':'🍎','饮料':'🥤','速食':'🍜','生鲜':'🥚','厨具':'🍳',
+  '家电':'🔌','收纳':'📦','卫浴':'🚿','数码':'📱','服饰':'👕','个护':'🧴','美妆':'💄',
+  '文体':'🏀','保健':'💊','生活好物':'🎁','健康保健':'💊','长尾需求':'📦','未知':'📦'
+};
+function productEmoji(p){
+  const name=(p&&p.name)||'';
+  for(const r of ICON_RULES){ if(name.includes(r[0])) return r[1]; }
+  return (p&&CAT_EMOJI[p.cat]) || '📦';
+}
+
+const AV_COLORS = {'张姐':'#E8915B','老陈':'#5B8DE8','王阿姨':'#9B6FC4','莉莉':'#E85B94','阿伟':'#3FAE8E',
+  '小林':'#C4A35B','梅子':'#7A8FC4','强子':'#5BC4B0','大鹏':'#C45B5B','我':'#07C160','京东优选助手':'#07C160',
+  /* G002 宝妈好物分享群 */
+  '乐乐妈':'#C07BA0','果果妈':'#7BA6C0','彤彤妈':'#A08FC4','豆豆爸':'#6FA8A0','小美':'#C48F7B','圆圆妈':'#8FA0C4','浩浩妈':'#B08F5E','妮妮':'#C48FB0',
+  /* G006 宠物铲屎官群 */
+  '铲屎官老王':'#7B8FC4','布丁妈':'#C47BA0','喵主子':'#A6C07B','柴犬阿福':'#C4A06F','汤圆爸':'#6FC0AE','花生妈':'#B07BC4'};
+
+/* 富消息历史（演示用，模拟一个真实活跃的邻居群） */
+const HISTORY = [
+  {t:'09:01',who:'张姐',text:'早上好呀各位 🌞'},
+  {t:'09:01',who:'老陈',text:'早'},
+  {t:'09:03',who:'王阿姨',text:'有没有'},
+  {t:'09:04',who:'王阿姨',text:'便宜点的枣子'},
+  {t:'09:05',who:'张姐',text:'上次买的那个枣子怎么不甜'},
+  {t:'09:06',who:'京东优选助手',type:'bot',
+    verdict:'push',product:PRODUCTS[1],
+    note:'【智能响应·已群内推送】需求相关性 0.85 ≥ τ=0.85，命中品类「枣」+价格意向「便宜」→推最低价款。'},
+  {t:'09:12',who:'莉莉',text:'求推荐儿童保温杯，娃上学要用，要耐摔的'},
+  {t:'09:13',who:'京东优选助手',type:'bot',
+    verdict:'push',product:PRODUCTS[8],
+    note:'【智能响应·已群内推送】命中品类「水杯」，佣金优先→推荐 膳魔师 129 元。'},
+  {t:'09:20',who:'阿伟',text:'收到'},
+  {t:'09:22',who:'小林',text:'猫粮快吃完了'},
+  {t:'09:22',who:'小林',text:'有活动吗'},
+  {t:'09:23',who:'梅子',text:'[表情]'},
+  {t:'09:25',who:'京东优选助手',type:'bot',
+    verdict:'push',product:PRODUCTS[14],
+    note:'【智能响应·三路并行】命中「猫粮」，无艾特→置顶群主选品池+Push群主+排期替换。'},
+  {t:'09:31',who:'张姐',text:'那个洗衣液不好用，洗不干净'},
+  {t:'09:34',who:'强子',text:'哈哈哈哈'},
+  {t:'09:40',who:'芳芳',text:'@群主 有没有老人用的手机推荐'},
+  {t:'09:41',who:'京东优选助手',type:'bot',
+    verdict:'push',product:PRODUCTS[13],
+    note:'【智能响应·机器人秒推】艾特+相关→群内即时推送「手机」品类。'},
+  {t:'09:46',who:'老陈',text:'要字大声音大的'},
+  {t:'09:52',who:'大鹏',text:'接龙：今晚跳操打卡 1.大鹏'},
+  {t:'10:01',who:'王阿姨',text:'有没有便宜点的米'},
+  {t:'10:02',who:'京东优选助手',type:'bot',
+    verdict:'push',product:PRODUCTS[17],
+    note:'【智能响应·低价优先】命中「米面」+价格意向「便宜」→推荐最低价品。'},
+  {t:'10:08',who:'莉莉',text:'@群主 电饭煲有啥推荐的吗，300以内'},
+  {t:'10:09',who:'京东优选助手',type:'bot',
+    verdict:'push',product:PRODUCTS[6],
+    note:'【智能响应·机器人秒推】艾特+「厨电」→推荐 美的电饭煲 299 元款。'},
+  {t:'10:15',who:'阿伟',text:'[图片]'},
+  {t:'10:18',who:'小林',text:'便宜的猫粮有吗'},
+  {t:'10:19',who:'京东优选助手',type:'bot',
+    verdict:'push',product:PRODUCTS[15],
+    note:'【智能响应·低价优先】命中「猫粮」+便宜→推荐 89 元无谷款。'},
+  {t:'10:25',who:'梅子',text:'今天天气真不错'},
+  {t:'10:27',who:'张姐',text:'是啊，带娃去公园溜溜'},
+  {t:'10:30',who:'老陈',text:'[表情]'},
+  {t:'10:34',who:'王阿姨',text:'上次那枣挺甜的，回购了'},
+  {t:'10:40',who:'大鹏',text:'@京东优选 今天的枣发不发车'},
+  {t:'10:41',who:'京东优选助手',type:'bot',
+    verdict:'push',product:PRODUCTS[0],
+    note:'【智能响应·机器人秒推】艾特+「枣」→即时推送。'},
+  {t:'10:48',who:'莉莉',text:'有没有人拼个水果'},
+  {t:'10:52',who:'小林',text:'我也想拼'},
+  {t:'10:55',who:'芳芳',text:'@京东优选 这个洗衣液能退吗，真的不好用'},
+  {t:'10:56',who:'京东优选助手',type:'bot',
+    verdict:'block',
+    note:'【平台决策】识别为「已购吐槽」(非新需求)，艾特→Push群主跟进，不推品不打扰。'},
+  {t:'11:02',who:'张姐',text:'大家中午吃啥'},
+  {t:'11:05',who:'老陈',text:'楼下兰州拉面'},
+  {t:'11:10',who:'梅子',text:'+1'},
+];
+
+/* 多群：与真平台试点群 G001/G002/G006 对应，演示"多个群同时监测" */
+const GROUPS = {
+  G001:{
+    name:'幸福里小区邻居群', size:'213人 · 实验组 · 活跃群',
+    neighbors:['张姐','老陈','王阿姨','莉莉','阿伟','小林','梅子','强子','芳芳','大鹏'],
+    history:HISTORY,
+  },
+  G002:{
+    name:'宝妈好物分享群', size:'186人 · 实验组 · 新用户群',
+    neighbors:['乐乐妈','果果妈','彤彤妈','豆豆爸','小美','圆圆妈','浩浩妈','妮妮'],
+    history:[
+      {t:'14:02',who:'乐乐妈',text:'求推荐儿童保温杯，娃上学要用，耐摔的'},
+      {t:'14:03',who:'京东优选助手',type:'bot',verdict:'push',product:PRODUCTS[9],note:'【智能响应·已群内推送】命中品类「水杯」，佣金优先→推荐 象印儿童款。'},
+      {t:'14:10',who:'果果妈',text:'拼不拼水果，5斤起'},
+      {t:'14:15',who:'彤彤妈',text:'@京东优选 有没有小孩吃的零食推荐'},
+      {t:'14:16',who:'京东优选助手',type:'bot',verdict:'push',product:PRODUCTS[20],note:'【智能响应·机器人秒推】艾特+「零食」→即时推送 乐事薯片。'},
+      {t:'14:25',who:'豆豆爸',text:'收到'},
+    ],
+  },
+  G006:{
+    name:'宠物铲屎官群', size:'167人 · 实验组 · 成熟用户群',
+    neighbors:['铲屎官老王','布丁妈','喵主子','柴犬阿福','汤圆爸','花生妈'],
+    history:[
+      {t:'16:01',who:'铲屎官老王',text:'猫粮快见底了'},
+      {t:'16:02',who:'京东优选助手',type:'bot',verdict:'push',product:PRODUCTS[14],note:'【智能响应·三路并行】命中「猫粮」→置顶选品池+Push群主+排期替换。'},
+      {t:'16:10',who:'布丁妈',text:'狗子该换粮了，有活动吗'},
+      {t:'16:11',who:'京东优选助手',type:'bot',verdict:'push',product:PRODUCTS[110],note:'【智能响应·已群内推送】命中宠物品类→推荐 皇家狗粮。'},
+      {t:'16:18',who:'喵主子',text:'[表情]'},
+    ],
+  },
+};
+let currentGroup='G001';
+
+const PRESETS = [
+  '我想要买2箱牛奶',
+  '帮我看看有没有蓝牙耳机',
+  '有没有便宜点的枣子',
+  '@京东优选 有没有老人机推荐，字大声音大',
+  '上次买的洗衣液不好用，洗不干净',
+  '今天天气真不错啊',
+  '电饭煲有啥推荐的吗，300以内',
+];
+
+/* ===================== 判断引擎（与真平台一致） ===================== */
+function preFilter(text, at){
+  const ROBOT=['机器人小助手','机器人','小助手','京东优选助手'];
+  if(ROBOT.includes(text)) return {pass:false,reason:'机器人消息'};
+  if(/^\[营销卡片\]|^\[推广\]|^\[广告\]/.test(text)) return {pass:false,reason:'营销消息'};
+  const trimmed=text.trim();
+  if(trimmed.length<=3 && !at) return {pass:false,reason:'超短消息'};
+  if(/^\[图片\]$|^\[表情\]$|^\[语音\]$|^(收到|好的|嗯|哦|哈|哈哈|哈哈哈哈|嗯嗯|哦哦|1|\+1)$|^接[龙]/.test(trimmed))
+    return {pass:false,reason:'无语义噪声（寒暄/斗图/灌水）'};
+  return {pass:true,reason:''};
+}
+function ruleRelevance(t){
+  const hasProduct=RULE_MAP.some(r=>r.cats.some(c=>t.includes(c)));
+  const hasIntent=/有没有|求推荐|想买|要买|买|下单|多少钱|有活动|有啥|有吗|推荐|哪个好|需要|想要|要/.test(t);
+  const isComplaint=COMPLAINT_MARKERS.some(m=>t.includes(m));
+  const relevant=hasProduct||hasIntent||isComplaint;
+  return {relevant,confidence:relevant?0.85:0.2,isComplaint};
+}
+function ruleParse(t){
+  let category='',keywords=[];
+  for(const r of RULE_MAP){
+    const hits=r.cats.filter(c=>t.includes(c));
+    if(hits.length){category=r.cat;keywords=hits;break;}
+  }
+  const isComplaint=COMPLAINT_MARKERS.some(m=>t.includes(m));
+  const hasBuy=/想买|要买|买点|买|下单|来点|囤点|求链接|有没有|有啥|有活动|有吗/.test(t);
+  const hasRec=/求推荐|推荐|哪个好/.test(t);
+  const hasCompare=/比价|便宜|多少钱|划算|贵|以内/.test(t);
+  let intent='complain';
+  if(isComplaint) intent='complain';
+  else if(hasCompare) intent='compare';
+  else if(hasRec) intent='ask_rec';
+  else if(hasBuy) intent='want_buy';
+  else if(category) intent='ask_rec';
+  const priceMatch=t.match(/(便宜的|便宜点|百元以内|\d+元以内|性价比|以内)/);
+  const qty=extractQty(t);
+  return {category:category||'未知',keywords,intent,price_pref:priceMatch?priceMatch[1]:null,qty};
+}
+function router(at,relevant,intent){
+  const isRelevant=relevant && intent!=='complain';
+  if(at && isRelevant) return {outlet:'robot_push',reason:'艾特 + 商品相关 → 机器人直接群内推品（秒级）'};
+  if(at && !isRelevant) return {outlet:'push_owner',reason:'艾特 + 非商品需求 → Push 群主跟进回复'};
+  if(!at && isRelevant) return {outlet:'triple',reason:'无艾特 + 真实需求 → 三路并行（置顶+Push+排期替换，分钟级）'};
+  return {outlet:'discard',reason:'无艾特 + 不相关 → 静默丢弃（隐私护栏）'};
+}
+function recommend(cat,keywords,pricePref){
+  let cands=PRODUCTS.filter(p=>p.cat===cat);
+  if(cands.length===0){
+    const kw=PRODUCTS.filter(p=>keywords.some(k=>p.name.includes(k)||p.cat.includes(k)));
+    if(kw.length===0) return [];
+    cands=kw;
+  } else if(keywords.length){
+    // 优先命中话里提到的具体商品（如「火鸡面」优先于其它零食）
+    const kw=cands.filter(p=>keywords.some(k=>p.name.includes(k)));
+    if(kw.length) cands=kw;
+  }
+  let ranked=[...cands];
+  if(pricePref && /便宜|低价|性价比|以内/.test(pricePref)) ranked.sort((a,b)=>a.price-b.price);
+  else ranked.sort((a,b)=>b.comm-a.comm);
+  return ranked.slice(0,3);
+}
+
+/* 主判断：返回结构化结果，供聊天气泡 + 面板共用 */
+let counters={intake:0,filtered:0,responded:0,held:0,blocked:0};
+function judge(rawText){
+  counters.intake++;
+  const at=/@/.test(rawText);
+  const clean=rawText.replace(/@\S+\s?/g,'').trim()||rawText;
+  const steps=[];
+  // ①
+  steps.push({n:1,name:'消息接入',badge:'pass',b:'已接入',dt:`群：幸福里邻居群(G001) · 发送人：我 · 艾特：${at?'是':'否'}`});
+  // ②
+  const f=preFilter(clean,at);
+  if(!f.pass){
+    counters.filtered++;
+    steps.push({n:2,name:'前置过滤',badge:'block',b:'拦截',dt:`识别为「${f.reason}」，零模型成本，不进入后续处理。`});
+    for(let i=3;i<=10;i++) steps.push({n:i,skip:true});
+    return {verdict:'block',steps,
+      chatNote:'【平台决策】识别为寒暄/表情/灌水，前置过滤，零模型成本，不处理不打扰。',at,intake:true};
+  }
+  steps.push({n:2,name:'前置过滤',badge:'pass',b:'通过',dt:'非噪声、非营销、语义完整，进入意图判定。'});
+  // ③
+  steps.push({n:3,name:'会话聚合窗',badge:'pass',b:'聚合完成',dt:'单条发言即一个发言单元（演示简化），送判定段。'});
+  // ④
+  const rel=ruleRelevance(clean);
+  const pass4=rel.relevant && rel.confidence>=TAU;
+  steps.push({n:4,name:'相关性判定 (BERT)',badge:pass4?'pass':'block',b:pass4?'相关':'不相关',
+    dt:`置信度 <code>${rel.confidence}</code> ${rel.confidence>=TAU?'≥':'<'} 阈值 τ=<code>${TAU}</code> → ${pass4?'触发':'静默'}`});
+  if(!pass4){
+    counters.blocked++;
+    for(let i=5;i<=10;i++) steps.push({n:i,skip:true});
+    return {verdict:'block',steps,
+      chatNote:'【平台决策】相关性不足（低于阈值 τ=0.85），按隐私护栏「静默不响应」，不扰民。',at};
+  }
+  // ⑤
+  const parsed=ruleParse(clean);
+  steps.push({n:5,name:'需求解析 (DeepSeek)',badge:'pass',b:'已解析',
+    dt:`品类 <code>${parsed.category}</code> · 意图 <code>${parsed.intent}</code>${parsed.price_pref?` · 价格意向 <code>${parsed.price_pref}</code>`:''}`});
+  // ⑥
+  steps.push({n:6,name:'去重与频控',badge:'pass',b:'放行',
+    dt:'首条同类需求，无需去重；本群非艾特响应余量 3/3（每日上限）。'});
+  // ⑦
+  const rt=router(at,rel.relevant,parsed.intent);
+  const isComplaint=parsed.intent==='complain';
+  steps.push({n:7,name:'分流决策 (艾特矩阵)',badge:'pass',b:'已分流',dt:rt.reason});
+  // ⑧⑨
+  let product=null,executed=false,resultNote='';
+  if(isComplaint){
+    // 吐槽：非新需求
+    if(at){
+      counters.blocked++;
+      steps.push({n:8,name:'商品获取',badge:'skip',b:'跳过',dt:'吐槽非需求，不取商品。'});
+      steps.push({n:9,name:'响应执行',badge:'block',b:'Push群主',dt:'艾特+吐槽 → Push 群主跟进，不推品。'});
+      for(let i=10;i<=10;i++) steps.push({n:i,skip:true});
+      return {verdict:'block',steps,chatNote:'【平台决策】识别为「已购吐槽」(非新需求)，艾特→Push群主跟进，不推品不打扰。',at};
+    }else{
+      counters.blocked++;
+      steps.push({n:8,name:'商品获取',badge:'skip',b:'跳过',dt:'吐槽非需求，不取商品。'});
+      steps.push({n:9,name:'响应执行',badge:'block',b:'静默',dt:'无艾特+吐槽 → 静默丢弃。'});
+      steps.push({n:10,name:'数据回流',badge:'skip',b:'—',dt:'未产生响应，仅记日志。'});
+      return {verdict:'block',steps,chatNote:'【平台决策】识别为「已购吐槽」(非新需求)，静默不推，避免打扰。',at};
+    }
+  }
+  const cands=recommend(parsed.category,parsed.keywords,parsed.price_pref);
+  const qty=parsed.qty;
+  if(cands.length===0){
+    // 开放选品：抽取你话里的任意商品实体，未预置也能识别并生成卡片推送（仅当实体"像商品"）
+    const ent=extractEntity(clean);
+    if(ent && looksLikeProduct(ent)){
+      product=makeLongtailProduct(ent, parsed.category==='未知'?null:parsed.category);
+      executed=true;counters.responded++;
+      const qtxt=qty?` ×${qty.n}${qty.unit}`:'';
+      steps.push({n:8,name:'商品获取',badge:'pass',b:'开放选品',dt:`品类未预置，实体抽取得到「<code>${ent}</code>」${qtxt}，判定为商品类→开放选品引擎命中并生成卡片。`});
+      const urgency=rt.outlet==='robot_push'?'秒级':'分钟级';
+      steps.push({n:9,name:'响应执行 (三出口)',badge:'push',b:'已响应',dt:`出口 <code>${rt.outlet}</code> · ${urgency} · 开放选品已识别并推送（标记待回填京东实时价）。`});
+      steps.push({n:10,name:'数据回流',badge:'pass',b:'已记录',dt:'长尾需求写入记录表，标记「待补品」，运营次日补录京东实时价。'});
+      return {verdict:'push',steps,product,qty,chatNote:`识别到你想买「${ent}${qtxt}」，已为你智能匹配并推送（开放选品：价格/佣金为演示占位，接入京东后回填实时价）。`,at,routed:rt.outlet};
+    }
+    counters.held++;
+    const entShow=ent?`「${ent}」`:'（无）';
+    steps.push({n:8,name:'商品获取',badge:'hold',b:'非商品',dt:`品类「${parsed.category}」无命中；实体 ${entShow} 判定为<strong>非商品类</strong>（如出游/问路/闲聊），不做商品匹配。`});
+    steps.push({n:9,name:'响应执行',badge:'hold',b:'暂不推送',dt:'非购物类咨询不推商品；如确需人工，可艾特群主转接。'});
+    steps.push({n:10,name:'数据回流',badge:'skip',b:'—',dt:'按非商品类咨询归档，不产生推品。'});
+    return {verdict:'hold',steps,chatNote:'【平台决策】识别为非购物类咨询（不是买商品的需求），不推商品；这类可艾特群主转人工跟进。',at};
+  }
+  product=cands[0];
+  executed=true;
+  counters.responded++;
+  const rankedTxt=cands.map(c=>`${c.name} ¥${c.price}`).join(' / ');
+  steps.push({n:8,name:'商品获取',badge:'pass',b:'命中',dt:`候选 Top3：${rankedTxt} → 取 Top1 <code>${product.name}</code>`});
+  let urgency='分钟级';
+  if(rt.outlet==='robot_push'){urgency='秒级';resultNote='机器人已在群内即时推送。';}
+  else if(rt.outlet==='triple'){resultNote='三路并行：群主端选品池置顶 + Push 群主 + 排期替换下一发品。';}
+  steps.push({n:9,name:'响应执行 (三出口)',badge:'push',b:'已响应',dt:`出口 <code>${rt.outlet}</code> · ${urgency} · ${resultNote}`});
+  steps.push({n:10,name:'数据回流',badge:'pass',b:'已记录',dt:'响应写入记录表，更新群点击活跃率看板（北极星指标）。'});
+  return {verdict:'push',steps,product,qty,chatNote:resultNote,at,routed:rt.outlet};
+}
+
+/* ===================== 渲染 ===================== */
+const chatEl=document.getElementById('chat');
+const stepsEl=document.getElementById('steps');
+const verdictEl=document.getElementById('verdictBox');
+const kpisEl=document.getElementById('kpis');
+const inputEl=document.getElementById('msgInput');
+const sendBtn=document.getElementById('sendBtn');
+
+/* @ 提及浮层：输入 @ 弹出候选，点击或回车补全，免手敲全名（仿微信） */
+const MENTIONS=[{n:'京东优选',s:'智能选品助手'},{n:'群主',s:'社群主理人'}];
+const mentionPop=document.getElementById('mentionPop');
+let mentionItems=[],mentionActive=0,mentionToken='';
+function mentionVisible(){return mentionPop.style.display==='block';}
+function renderMention(){
+  mentionPop.innerHTML=mentionItems.map((it,i)=>
+    `<div class="mention-item${i===mentionActive?' active':''}" data-name="${it.n}"><span class="at">@</span>${it.n}<span class="mi-sub">${it.s}</span></div>`).join('');
+  mentionPop.style.display='block';
+  mentionPop.querySelectorAll('.mention-item').forEach(el=>{
+    el.addEventListener('mousedown',ev=>{ev.preventDefault();const i=mentionItems.findIndex(x=>x.n===el.dataset.name);pickMention(i);});
+  });
+}
+function onMentionInput(){
+  const v=inputEl.value;const m=v.match(/@([^\s@]*)$/);
+  if(m){mentionToken=m[1];mentionItems=MENTIONS.filter(it=>it.n.toLowerCase().includes(mentionToken.toLowerCase()));
+    if(mentionItems.length){mentionActive=0;renderMention();return;}}
+  hideMention();
+}
+function hideMention(){mentionPop.style.display='none';mentionItems=[];mentionActive=0;}
+function moveMention(d){if(!mentionVisible())return;mentionActive=(mentionActive+d+mentionItems.length)%mentionItems.length;renderMention();}
+function pickMention(i){
+  const it=mentionItems[i];if(!it)return;
+  const v=inputEl.value;const newV=v.slice(0,v.length-mentionToken.length-1)+'@'+it.n+' ';
+  inputEl.value=newV;hideMention();inputEl.focus();inputEl.dispatchEvent(new Event('input'));
+}
+inputEl.addEventListener('input',onMentionInput);
+inputEl.addEventListener('blur',()=>setTimeout(hideMention,150));
+
+function av(name){return `<div class="av" style="background:${AV_COLORS[name]||'#888'}">${name.slice(0,1)}</div>`;}
+function timeNow(){const d=new Date();return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
+function scrollChat(){chatEl.scrollTop=chatEl.scrollHeight;}
+const MAX_MSG=100;   // 聊天区最多保留 100 条，超出自动删最早
+function pruneChat(){
+  const rows=chatEl.querySelectorAll('.wx-row');
+  const excess=rows.length-MAX_MSG;
+  if(excess<=0) return;
+  for(let i=0;i<excess;i++){
+    const el=rows[i];
+    if(el.parentNode) el.parentNode.removeChild(el);
+  }
+}
+
+function renderHistory(){
+  chatEl.innerHTML='';
+  const g=GROUPS[currentGroup];
+  chatEl.insertAdjacentHTML('beforeend',`<div class="wx-time">今天 09:00</div>`);
+  g.history.forEach(m=>{
+    if(m.type==='bot') chatEl.insertAdjacentHTML('beforeend',botBubble(m));
+    else if(m.who==='我') chatEl.insertAdjacentHTML('beforeend',meBubble(m));
+    else chatEl.insertAdjacentHTML('beforeend',otherBubble(m));
+  });
+  scrollChat();
+}
+function renderGroupBar(){
+  const bar=document.getElementById('groupBar');
+  bar.innerHTML=Object.keys(GROUPS).map(id=>{
+    const g=GROUPS[id];
+    return `<div class="gchip ${id===currentGroup?'on':''}" data-g="${id}">${g.name}</div>`;
+  }).join('')
+    + `<div class="gbar-spacer"></div><button class="gchip atog ${autoChat?'on':''}" id="autoToggle">${autoChat?'⏸ 暂停自动聊天':'▶ 继续自动聊天'}</button>`;
+  bar.querySelectorAll('.gchip[data-g]').forEach(c=>{
+    c.addEventListener('click',()=>switchGroup(c.dataset.g));
+  });
+  document.getElementById('autoToggle').addEventListener('click',toggleAutoChat);
+}
+function switchGroup(id){
+  if(id===currentGroup) return;
+  currentGroup=id;
+  renderGroupBar();
+  renderHistory();
+  const g=GROUPS[id];
+  document.querySelector('.wx-title').innerHTML=`京东优选·${g.name}<small>${g.size}</small>`;
+  chatEl.insertAdjacentHTML('beforeend',`<div class="wx-sys">已切换到「${g.name}」· 平台同步监测中</div>`);
+  scrollChat();
+  armAmbient();
+  if(onlineOk===true) syncHistory();
+}
+function otherBubble(m){
+  return `<div class="wx-row"><div class="av" style="background:${AV_COLORS[m.who]||'#888'}">${m.who.slice(0,1)}</div>
+    <div class="wx-col"><div class="wx-name">${m.who}</div><div class="bubble">${esc(m.text)}</div></div></div>`;
+}
+function meBubble(m){
+  return `<div class="wx-row me"><div class="av" style="background:${AV_COLORS['我']}">我</div>
+    <div class="wx-col"><div class="bubble">${esc(m.text)}</div></div></div>`;
+}
+function botBubble(m){
+  const vClass=m.verdict==='push'?'verdict-push':m.verdict==='hold'?'verdict-hold':'verdict-block';
+  const tagOff=m.verdict==='push'?'':' bot-tag-off';
+  let card='';
+  if(m.product){
+    card=`<div class="pcard"><div class="pc-top">
+      <div class="pc-thumb">${productEmoji(m.product)}</div>
+      <div style="flex:1"><div class="pc-nm">${m.product.name}</div>
+      <div class="pc-meta">品类 ${m.product.cat} · 佣金 ${m.product.comm}%</div></div>
+      <div class="pc-pr">¥${m.product.price}<small>/件</small></div></div>
+      <div class="pc-ft">京东优选 · 社群专属价 · 点击查看详情</div></div>`;
+  }
+  return `<div class="wx-row bot"><div class="av" style="background:${AV_COLORS['京东优选助手']}">京</div>
+    <div class="wx-col"><div class="wx-name">京东优选助手</div>
+    <div class="bubble"><span class="bot-tag${tagOff}">智能响应</span>
+    <div class="${vClass}">${esc(m.note)}</div>${card}</div></div></div>`;
+}
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+function addUserMsg(text){
+  chatEl.insertAdjacentHTML('beforeend',meBubble({who:'我',text}));
+  pruneChat();scrollChat();
+}
+function addTyping(){
+  const id='typing'+Date.now();
+  chatEl.insertAdjacentHTML('beforeend',
+    `<div class="wx-row bot" id="${id}"><div class="av" style="background:${AV_COLORS['京东优选助手']}">京</div>
+     <div class="wx-col"><div class="wx-name">京东优选助手</div>
+     <div class="bubble"><div class="typing"><i></i><i></i><i></i></div></div></div></div>`);
+  scrollChat();return id;
+}
+function removeTyping(id){const e=document.getElementById(id);if(e)e.remove();}
+function addBotResponse(res){
+  const vClass=res.verdict==='push'?'verdict-push':res.verdict==='hold'?'verdict-hold':'verdict-block';
+  const tagOff=res.verdict==='push'?'':' bot-tag-off';
+  let card='';
+  if(res.product){
+    const p=res.product;
+    const qtxt=res.qty?`数量 ${res.qty.n}${res.qty.unit}`:'';
+    const priceTxt=p.price!=null?`¥${p.price}<small>/件</small>`:'社群专属价';
+    const meta=p.longtail?`智能识别 · 品类 ${p.cat} · 佣金 ${p.comm}%${qtxt?(' · '+qtxt):''}（价格占位）`:`品类 ${p.cat} · 佣金 ${p.comm}%${qtxt?(' · '+qtxt):''}`;
+    const buyBtn=`<div class="pc-buy" onclick="alert('✅ 已加入购物车（演示）\\n${productEmoji(p)} ${esc(p.name)} ${qtxt}'.trim())">立即下单</div>`;
+    card=`<div class="pcard"><div class="pc-top">
+      <div class="pc-thumb">${productEmoji(p)}</div>
+      <div style="flex:1"><div class="pc-nm">${esc(p.name)}</div>
+      <div class="pc-meta">${meta}</div></div>
+      <div class="pc-pr">${priceTxt}</div></div>
+      <div class="pc-ft">京东优选 · 社群专属价 · 点击查看详情</div>
+      ${buyBtn}</div>`;
+  }
+  const head=res.verdict==='push'?'【智能响应·已推送】':res.verdict==='hold'?'【平台决策·暂未推送】':'【平台决策·不响应】';
+  chatEl.insertAdjacentHTML('beforeend',
+    `<div class="wx-row bot"><div class="av" style="background:${AV_COLORS['京东优选助手']}">京</div>
+     <div class="wx-col"><div class="wx-name">京东优选助手</div>
+     <div class="bubble"><span class="bot-tag${tagOff}">智能响应</span>
+     <div>${head}</div><div class="${vClass}" style="margin-top:3px">${esc(res.chatNote)}</div>${card}</div></div></div>`);
+  pruneChat();scrollChat();
+}
+
+/* ===================== 邻居（大爷大妈）持续对话：小剧场引擎 =====================
+   原则：① 接话要"接得上"——台词成链，A 问 B 答 C 附议，不是各说各的；
+        ② 按你发的实际内容回应（商品名/价格/吐槽）；
+        ③ 防重复——最近用过的台词不马上再用。 */
+const CHAIN_PUSH=[
+  ['这个看起来不错诶，多少钱','上面卡片有价，{price} 左右','那我先加购了'],
+  ['这个牌子靠谱吗','买过他家别的，质量可以','那我也来一个'],
+  ['蹲一个，等大家反馈','收到，我已经下单了，到了说','好嘞，蹲你反馈'],
+  ['谁买过这个呀','我买过，性价比还行','那我放心了'],
+  ['多少钱啊','卡片上有价，{price}','能接受，冲了'],
+  ['好吃/好用吗，说下感受','等我收到用几天再报','好，等你消息'],
+];
+const CHAIN_PUSH_DIRECT=[
+  ['你要买{entity}呀？我上次买过，还行','真的吗，那我也放心了','哈哈你们手速真快'],
+  ['{entity}的话，{price} 这个价可以','同意，可以冲','好，那我下单了'],
+  ['巧了，我也在看{entity}','一起啊，团购价更香','算我一个'],
+];
+const CHAIN_BLOCK_COMPLAINT=[
+  ['确实是，上次那个也不好用','找群主反应一下呗','对，让优选那边换个靠谱的'],
+  ['我也遇到过，唉','哈哈同款经历','以后先问问再买'],
+  ['客服怎么说','还没回，等等看','蹲个后续'],
+];
+const CHAIN_SILENCE=[
+  ['哈哈哈哈哈','笑死我了','这楼歪的'],
+  ['楼上说得对','附议','+1'],
+  ['说到这个我就来气','咋了咋了','下次细说'],
+];
+const CHAIN_HOLD=[
+  ['蹲一个，等补货','我也想要，到了喊我','收到，我盯着'],
+  ['先记着，等通知','+1','嗯嗯'],
+];
+const AMBIENT_CHAINS=[
+  ['有没有人拼个水果呀🍎','我拼，算我一个','好，晚上拉个接龙'],
+  ['今天降温了，大家多穿点','谢谢提醒，出门加了件外套','对，风还挺大'],
+  ['晚上跳操的准时来哈','必须的，7点楼下集合','带我一个'],
+  ['谁家有多余的快递箱','我家有俩，要的话给你','好嘞谢啦'],
+  ['刚下楼取了个大快递','买的啥呀','先保密哈哈'],
+  ['中午吃啥呢，纠结','楼下那家面馆不错','走，一起'],
+  ['这天气适合晒被子','对，我早上就晒出去了','晚上记得收'],
+  ['娃写作业磨蹭死了','同款，太累了','唉，同病相怜'],
+  ['今晚有没有人打牌','有，老地方','算我一个'],
+  ['这个群今天真热闹','可不，人多好办事','哈哈'],
+];
+/* 邻居的真实需求：邻居提出 → 小助手实时响应（群像真的一样，人人都在被服务） */
+const NEED_EVENTS=[
+  '求推荐儿童保温杯，娃上学要用，要耐摔的',
+  '猫粮快吃完了，有活动吗',
+  '@京东优选 有没有便宜点的电饭煲，300以内',
+  '有没有老人机推荐，字大声音大',
+  '想买点车厘子，哪里有便宜的',
+  '洗衣液快没了，求推荐',
+  '家里缺个台灯，有没有好用的',
+  '@京东优选 今天有没有枣的优惠',
+];
+let lastNeedAt=0;
+/* 掷骰子：邻居提需求 → 小助手带"正在输入"实时推送（面板同步展示判定） */
+function maybeNeedEvent(){
+  if(Date.now()-lastNeedAt<25000) return false;   // 需求事件冷却，避免刷屏
+  if(Math.random()>0.35) return false;
+  lastNeedAt=Date.now();
+  const text=pick(NEED_EVENTS);
+  const who=pick(GROUPS[currentGroup].neighbors);
+  later(()=>{
+    const tid=addTypingWho(who);
+    later(()=>{removeTyping(tid);addOtherMsg(who,text);},750+Math.floor(Math.random()*450));
+  },400);
+  later(()=>{
+    const tid2=addTyping();
+    later(()=>{
+      removeTyping(tid2);
+      const res=judge(text);
+      addBotResponse(res);
+      renderPanel(res);
+    },900+Math.floor(Math.random()*400));
+  },2300);
+  return true;
+}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+const recentLines=[];
+function pickFresh(pool){
+  const fresh=pool.filter(l=>!recentLines.includes(l));
+  const src=fresh.length?fresh:pool;
+  const line=src[Math.floor(Math.random()*src.length)];
+  recentLines.push(line);
+  if(recentLines.length>14) recentLines.shift();
+  return line;
+}
+function addTypingWho(name){
+  const id='typing'+Date.now()+Math.floor(Math.random()*9999);
+  chatEl.insertAdjacentHTML('beforeend',
+    `<div class="wx-row" id="${id}"><div class="av" style="background:${AV_COLORS[name]||'#888'}">${name.slice(0,1)}</div>
+     <div class="wx-col"><div class="wx-name">${name}</div>
+     <div class="bubble"><div class="typing"><i></i><i></i><i></i></div></div></div></div>`);
+  scrollChat();return id;
+}
+function addOtherMsg(name,text){
+  chatEl.insertAdjacentHTML('beforeend',
+    `<div class="wx-row"><div class="av" style="background:${AV_COLORS[name]||'#888'}">${name.slice(0,1)}</div>
+     <div class="wx-col"><div class="wx-name">${name}</div><div class="bubble">${esc(text)}</div></div></div>`);
+  pruneChat();scrollChat();
+  syncNeighbor(name,text);   // 邻居消息同样实时同步进中台（机器人全量回传）
+}
+/* 可追踪的定时器：暂停时能全部清掉，保证"真暂停" */
+const chainTimers=[];
+function later(fn,ms){const id=setTimeout(fn,ms);chainTimers.push(id);return id;}
+function clearChainTimers(){while(chainTimers.length){clearTimeout(chainTimers.pop());}}
+/* 把一条台词链交给 2~3 位不同邻居，带"正在输入"，接龙式发出 */
+function deliverChain(chain){
+  const pool=[...GROUPS[currentGroup].neighbors];
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+  let t=500;
+  chain.forEach((line,i)=>{
+    const who=pool[i%pool.length];
+    later(()=>{
+      const tid=addTypingWho(who);
+      later(()=>{removeTyping(tid);addOtherMsg(who,line);},750+Math.floor(Math.random()*450));
+    },t);
+    t+=1600+Math.floor(Math.random()*550);
+  });
+}
+function neighborFollowUp(res, text){
+  if(!autoChat) return;   // 已暂停自动聊天：只回你自己发的消息，邻居不接话
+  let chain;
+  const isComplaint=COMPLAINT_MARKERS.some(x=>text.includes(x));
+  if(res.verdict==='push'){
+    const ent=extractEntity(text.replace(/@\S+\s?/g,''))||'';
+    const direct=!!ent && Math.random()<0.6;
+    chain=pickFresh(direct?CHAIN_PUSH_DIRECT:CHAIN_PUSH);
+    const p=res.product;
+    chain=chain.map(l=>l.replace(/\{entity\}/g,ent).replace(/\{name\}/g,p?p.name:'').replace(/\{price\}/g,p?('¥'+p.price):''));
+  } else if(res.verdict==='block'){
+    chain=pickFresh(isComplaint?CHAIN_BLOCK_COMPLAINT:CHAIN_SILENCE);
+  } else {
+    chain=pickFresh(CHAIN_HOLD);
+  }
+  deliverChain(chain);
+  armAmbient();
+}
+let ambientTimer=null;
+let autoChat=true;   // 自动聊天总开关（环境闲聊 + 邻居接话）
+function setAutoChat(on){
+  autoChat=on;
+  const btn=document.getElementById('autoToggle');
+  if(btn){btn.textContent=on?'⏸ 暂停自动聊天':'▶ 继续自动聊天';btn.classList.toggle('on',on);}
+  if(on){
+    // 继续：先立刻聊一句（马上有反馈），再进入常态节奏
+    later(()=>{if(autoChat) deliverChain(pickFresh(AMBIENT_CHAINS));},1000);
+    armAmbient();
+  }else{
+    // 暂停：清掉环境定时器 + 所有在播的接话定时器，保证"真暂停"
+    if(ambientTimer){clearTimeout(ambientTimer);ambientTimer=null;}
+    clearChainTimers();
+  }
+}
+/* 与中台的"开始/暂停"双向同步：本地点开关 → 推送中台；中台变了 → 轮询拉回 */
+function toggleAutoChat(){
+  const on=!autoChat;
+  setAutoChat(on);
+  fetch(ONLINE_API+'/api/control/pause',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paused:!on})}).catch(()=>{});
+}
+function pollPause(){
+  if(!onlineOk) return;   // 未连上中台时只本地控制
+  fetch(ONLINE_API+'/api/control/status')
+    .then(r=>r.json())
+    .then(j=>{
+      if(j && typeof j.paused==='boolean'){
+        if(j.paused && autoChat) setAutoChat(false);
+        else if(!j.paused && !autoChat) setAutoChat(true);
+      }
+    }).catch(()=>{});
+}
+function armAmbient(){
+  if(!autoChat) return;
+  if(ambientTimer) clearTimeout(ambientTimer);
+  ambientTimer=setTimeout(()=>{
+    if(!autoChat) return;
+    if(!maybeNeedEvent()) deliverChain(pickFresh(AMBIENT_CHAINS));
+    armAmbient();
+  },5000+Math.floor(Math.random()*2000));
+}
+
+function renderPanel(res){
+  // KPIs
+  kpisEl.innerHTML=`
+    <div class="kpi"><div class="l">接入消息</div><div class="v">${counters.intake}</div></div>
+    <div class="kpi"><div class="l">已推送</div><div class="v" style="color:var(--ok)">${counters.responded}</div></div>
+    <div class="kpi"><div class="l">暂留/不推</div><div class="v" style="color:var(--warn)">${counters.held+counters.blocked}</div></div>
+    <div class="kpi"><div class="l">前置过滤</div><div class="v" style="color:var(--up)">${counters.filtered}</div></div>`;
+  // Steps
+  stepsEl.innerHTML=res.steps.map(s=>{
+    if(s.skip) return `<div class="step skip"><div class="num">${s.n}</div><div class="body"><div class="st"><b>步骤${s.n}</b><span class="badge b-skip">跳过</span></div></div></div>`;
+    const bcls={pass:'b-pass',skip:'b-skip',push:'b-push',hold:'b-hold',block:'b-block'}[s.badge];
+    return `<div class="step on"><div class="num">${s.n}</div><div class="body">
+      <div class="st"><b>${s.name}</b><span class="badge ${bcls}">${s.b}</span></div>
+      <div class="dt">${s.dt}</div></div></div>`;
+  }).join('');
+  // Verdict box
+  const vmap={push:['vb-push','✅ 结论：建议推送商品','匹配到高潜需求，按分流策略执行响应，计入北极星指标。'],
+    hold:['vb-hold','⏸ 结论：暂不推送','需求相关但非购物类/无匹配商品，保守不推，避免误推。'],
+    block:['vb-block','🚫 结论：不响应（静默/过滤）','不相关、噪声或吐槽，按隐私护栏静默，零打扰、零成本。']};
+  const [vc,vt,vd]=vmap[res.verdict];
+  verdictEl.innerHTML=`<div class="verdict-box ${vc}"><div class="vt">${vt}</div>
+    <div class="vd">${vd}<br><span style="color:#8a8f99">相关性阈值 τ=${TAU}（置信度≥τ 才触发）· 艾特矩阵控制三出口</span></div></div>`;
+}
+
+/* ===================== 线上中台联通 ===================== */
+/* 与真部署平台（Railway）打通：发消息实时同步进中台十步管线，平台端"实时需求收集"即时可见 */
+const ONLINE_API='https://guanwt-production.up.railway.app';
+let onlineOk=null, onlineLast='', lastSyncFail=0;   // null=未知，false=离线，true=已连接
+function updateSync(){
+  const el=document.getElementById('syncStatus');
+  if(!el) return;
+  el.classList.toggle('on',onlineOk);
+  el.innerHTML=onlineOk
+    ? `<span class="dot"></span>已连接线上中台 · 平台判定：${onlineLast||'—'}`
+    : `<span class="dot"></span>离线模式（本页内置引擎判定，未连线上中台）`;
+}
+function fmtVerdict(j){
+  const vcn={push:'推送',hold:'暂不推送',block:'不推',skip:'已去重'};
+  return `${vcn[j.verdict]||j.verdict}${j.product?(' · '+j.product.name):''}`;
+}
+async function syncToPlatform(payload){
+  try{
+    const ctrl=new AbortController();
+    const to=setTimeout(()=>ctrl.abort(),3000);
+    const r=await fetch(ONLINE_API+'/api/ingest',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload),
+      signal:ctrl.signal,
+    });
+    clearTimeout(to);
+    if(!r.ok) throw new Error('http '+r.status);
+    const j=await r.json();
+    if(!j||!j.online) throw new Error('bad resp');
+    onlineOk=true; onlineLast=fmtVerdict(j);
+  }catch(e){ onlineOk=false; onlineLast=''; lastSyncFail=Date.now(); }
+  updateSync();
+}
+function syncOnline(text){
+  return syncToPlatform({group:currentGroup,user:'我',text,at:/@/.test(text)});
+}
+function syncNeighbor(user,text){
+  // 所有消息都应进平台；仅当刚失败（4s 冷却）时暂缓，避免离线时逐条刷屏
+  if(onlineOk===false && Date.now()-lastSyncFail<4000) return;
+  syncToPlatform({group:currentGroup,user,text,at:false});
+}
+async function testOnline(){
+  try{
+    const ctrl=new AbortController();
+    const to=setTimeout(()=>ctrl.abort(),3000);
+    const r=await fetch(ONLINE_API+'/health',{signal:ctrl.signal});
+    clearTimeout(to);
+    onlineOk=r.ok; onlineLast='';
+  }catch(e){ onlineOk=false; }
+  updateSync();
+  if(onlineOk) syncHistory();
+}
+/* 把当前群的聊天历史批量同步进中台（保证"微信页消息 = 中台消息"，每群只同步一次） */
+const syncedGroups=new Set();
+async function syncHistory(){
+  if(onlineOk!==true) return;
+  if(syncedGroups.has(currentGroup)) return;
+  syncedGroups.add(currentGroup);
+  const g=GROUPS[currentGroup];
+  const items=g.history.filter(m=>m.who!=='京东优选助手')
+    .map(m=>({group:currentGroup,user:m.who,text:m.text,at:/@/.test(m.text)}));
+  if(!items.length) return;
+  try{
+    const ctrl=new AbortController();
+    const to=setTimeout(()=>ctrl.abort(),8000);
+    const r=await fetch(ONLINE_API+'/api/ingest-batch',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(items),signal:ctrl.signal,
+    });
+    clearTimeout(to);
+    const j=await r.json();
+    if(j&&j.online){ onlineOk=true; onlineLast=`已同步群历史 ${j.done} 条`; }
+  }catch(e){ /* 静默失败，下次切群再试 */ }
+  updateSync();
+}
+
+/* ===================== 交互 ===================== */
+function doSend(text){
+  text=text.trim();if(!text)return;
+  addUserMsg(text);
+  const tid=addTyping();
+  sendBtn.disabled=true;inputEl.disabled=true;
+  const res=judge(text);
+  setTimeout(()=>{
+    removeTyping(tid);
+    addBotResponse(res);
+    renderPanel(res);
+    sendBtn.disabled=false;inputEl.disabled=false;inputEl.focus();
+    neighborFollowUp(res, text);
+    syncOnline(text);
+  },900);
+}
+sendBtn.addEventListener('click',()=>{doSend(inputEl.value);inputEl.value='';});
+inputEl.addEventListener('keydown',e=>{
+  if(mentionVisible()){
+    if(e.key==='Enter'){e.preventDefault();pickMention(mentionActive);}
+    else if(e.key==='ArrowDown'){e.preventDefault();moveMention(1);}
+    else if(e.key==='ArrowUp'){e.preventDefault();moveMention(-1);}
+    else if(e.key==='Escape'){e.preventDefault();hideMention();}
+    return;
+  }
+  if(e.key==='Enter'){doSend(inputEl.value);inputEl.value='';}
+});
+
+// 示例话术（默认折叠，点「示例话术 ›」展开；展开后也是纯话术，不像演示标签）
+const presetsEl=document.getElementById('presets');
+PRESETS.forEach(p=>{
+  const c=document.createElement('div');c.className='chip';c.textContent=p;
+  c.addEventListener('click',()=>{doSend(p);});
+  presetsEl.appendChild(c);
+});
+
+/* 测试集：一键自测（先判定对错，再发到当前群自动演示） */
+const TEST_CASES=[
+  {label:'① 具体商品+数量', text:'我想要买2箱牛奶', expect:'push'},
+  {label:'② 开放选品（池外商品）', text:'帮我看看有没有蓝牙耳机', expect:'push'},
+  {label:'③ 想买+便宜', text:'有没有便宜点的枣子', expect:'push'},
+  {label:'④ 艾特+相关', text:'@京东优选 有没有老人机推荐，字大声音大', expect:'push'},
+  {label:'⑤ 比价+预算', text:'电饭煲有啥推荐的吗，300以内', expect:'push'},
+  {label:'⑥ 儿童用品', text:'求推荐儿童保温杯，要耐摔的', expect:'push'},
+  {label:'⑦ 已购吐槽（不推）', text:'上次买的洗衣液不好用，洗不干净', expect:'block'},
+  {label:'⑧ 寒暄（静默）', text:'今天天气真不错啊', expect:'block'},
+  {label:'⑨ 灌水噪声（过滤）', text:'收到', expect:'block'},
+  {label:'⑩ 接龙（过滤）', text:'接龙：今晚跳操打卡 1.大鹏', expect:'block'},
+  {label:'⑪ 出游推荐（不推）', text:'我想要出去玩，有没有什么地方推荐', expect:'hold'},
+  {label:'⑫ 附近美食（不推）', text:'附近有什么好吃的推荐吗', expect:'hold'},
+];
+let testRunning=false;
+function runTestSuite(){
+  if(testRunning) return; testRunning=true;
+  const resBox=document.getElementById('testRes');
+  const vCN={push:'推送',hold:'暂不推',block:'不推'};
+  let idx=0,pass=0,fail=0;
+  resBox.innerHTML='<div style="color:var(--sub)">正在自动演示…（每条先判定、再发到当前群）</div>';
+  const next=()=>{
+    if(idx>=TEST_CASES.length){
+      resBox.insertAdjacentHTML('afterbegin',
+        `<div class="${fail?'no':'ok'}" style="font-size:13px;font-weight:700;padding:4px 0">✅ 自测完成：通过 ${pass}/${TEST_CASES.length}${fail?` · 未通过 ${fail} 条（红色✗，见下）`:''}</div>`);
+      testRunning=false;return;
+    }
+    const tc=TEST_CASES[idx++];
+    const res=judge(tc.text);
+    const ok=res.verdict===tc.expect;
+    if(ok)pass++;else fail++;
+    resBox.insertAdjacentHTML('beforeend',
+      `<div class="row"><span class="${ok?'ok':'no'}">${ok?'✓':'✗'}</span>
+       <span class="tt">${tc.label} · <b>${tc.text}</b><br><span style="color:var(--faint)">期望 ${vCN[tc.expect]} → 实际 ${vCN[res.verdict]}</span></span></div>`);
+    doSend(tc.text);
+    setTimeout(next,2400);
+  };
+  next();
+}
+document.getElementById('testToggle').addEventListener('click',()=>{
+  document.getElementById('testWrap').classList.toggle('open');
+});
+document.getElementById('testRunBtn').addEventListener('click',runTestSuite);
+document.getElementById('presetsToggle').addEventListener('click',()=>{
+  document.getElementById('presetsWrap').classList.toggle('open');
+});
+
+// 重置
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  counters={intake:0,filtered:0,responded:0,held:0,blocked:0};
+  renderGroupBar();
+  renderHistory();
+  armAmbient();
+  document.getElementById('testRes').innerHTML='';
+  stepsEl.innerHTML='<div class="step"><div class="num">·</div><div class="body"><div class="st"><b>等待发消息…</b></div><div class="dt">在左侧假微信里发一条消息，这里会实时显示平台 10 步处理链路。</div></div></div>';
+  verdictEl.innerHTML='';kpisEl.innerHTML='';
+});
+
+renderGroupBar();
+renderHistory();
+armAmbient();
+testOnline();
+setInterval(pollPause,3000);
+renderPanel({steps:[{n:1,skip:true},{n:2,skip:true},{n:3,skip:true},{n:4,skip:true},{n:5,skip:true},{n:6,skip:true},{n:7,skip:true},{n:8,skip:true},{n:9,skip:true},{n:10,skip:true}],
+  verdict:'block'});
+kpisEl.innerHTML=`<div class="kpi"><div class="l">接入消息</div><div class="v">0</div></div>
+  <div class="kpi"><div class="l">已推送</div><div class="v" style="color:var(--ok)">0</div></div>
+  <div class="kpi"><div class="l">暂留/不推</div><div class="v" style="color:var(--warn)">0</div></div>
+  <div class="kpi"><div class="l">前置过滤</div><div class="v" style="color:var(--up)">0</div></div>`;
+</script>
+</body>
+</html>

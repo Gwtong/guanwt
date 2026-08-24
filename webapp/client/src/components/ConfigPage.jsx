@@ -67,7 +67,7 @@ export default function ConfigPage({ config, tick }) {
       <div style={{ display: 'grid', gap: 14, alignContent: 'start' }}>
         <div className="card">
           <h3>AI 服务配置 <span className="fchip">F-04</span></h3>
-          <div className="desc">密钥仅存后端，不回显前端。当前状态：{config?.deepseek_key ? <span className="tag t-ok">已配置 DeepSeek</span> : <span className="tag t-warn">未配置（使用规则替身）</span>}</div>
+          <div className="desc">密钥仅存后端，不回显前端。当前状态：{config?.deepseek_key ? <span className="tag t-ok">已配置 DeepSeek</span> : <span className="tag t-warn">未配置（内置判定引擎）</span>}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <label>调用模式
               <select value={form.ai_mode} onChange={e => update('ai_mode', e.target.value)}>

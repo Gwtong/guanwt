@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api/client.js';
 
+const VRow = ({ k, v }) => (
+  <div className="vrow"><span className="vk">{k}</span><span className="vv">{v}</span></div>
+);
+
 export default function DashboardPage({ tick }) {
   const [dash, setDash] = useState(null);
 
@@ -95,6 +99,42 @@ export default function DashboardPage({ tick }) {
           <div className="note">艾特场景为秒级，非艾特为分钟级～下一发品时点。</div>
         </div>
       </div>
+
+    {dash.pilot && (
+      <>
+        <div className="section-head">
+          <h2>试点 vs 对照 <span className="fchip">F-25</span></h2>
+          <div className="desc">实验组（treatment）接入快速响应能力，对照组（control）保持原状；两臂分组可比，用于显著性检验。群点击活跃率提升用两比例 z 检验判定是否统计显著。</div>
+        </div>
+        <div className="grid two">
+          <div className="card pilot-card hl">
+            <div className="arm"><span className="arm-dot t"></span>实验组（treatment）</div>
+            <VRow k="需求识别量" v={dash.pilot.treatment.identified} />
+            <VRow k="平均热度" v={dash.pilot.treatment.avgHeat} />
+            <VRow k="响应率" v={dash.pilot.treatment.responseRate + '%'} />
+            <VRow k="采纳率" v={dash.pilot.treatment.adoptionRate + '%'} />
+            <VRow k="群点击活跃率（基线）" v={dash.pilot.treatment.baselineRate + '%'} />
+            <VRow k="群点击活跃率（当前）" v={<b className="okc">{dash.pilot.treatment.liveRate}%</b>} />
+          </div>
+          <div className="card pilot-card">
+            <div className="arm"><span className="arm-dot c"></span>对照组（control）</div>
+            <VRow k="需求识别量" v={dash.pilot.control.identified} />
+            <VRow k="平均热度" v={dash.pilot.control.avgHeat} />
+            <VRow k="响应率" v={dash.pilot.control.responseRate + '%'} />
+            <VRow k="采纳率" v={dash.pilot.control.adoptionRate + '%'} />
+            <VRow k="群点击活跃率（基线）" v={dash.pilot.control.baselineRate + '%'} />
+            <VRow k="群点击活跃率（当前）" v={dash.pilot.control.liveRate + '%'} />
+          </div>
+        </div>
+        <div className={`pilot-banner ${dash.pilot.significant ? 'ok' : 'warn'}`}>
+          <div>
+            <div className="b-main">群点击活跃率{dash.pilot.liftPct >= 0 ? '提升' : '下降'} {Math.abs(dash.pilot.liftPct)}%</div>
+            <div className="b-sub">{dash.pilot.note}</div>
+          </div>
+          <div className="b-badge">{dash.pilot.significant ? `p=${dash.pilot.pValue} 显著` : `p=${dash.pilot.pValue} 不显著`}</div>
+        </div>
+      </>
+    )}
     </div>
   );
 }

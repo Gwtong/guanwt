@@ -185,6 +185,13 @@ export const mock = {
     finish();
     return { ok: true };
   },
+  getControlStatus() {
+    return { paused: S.paused || false };
+  },
+  setControlPause(paused) {
+    S.paused = !!paused;
+    return { paused: S.paused };
+  },
   getStream(since = 0) {
     return { logs: S.logs.filter(l => l.virtualTime >= since).reverse(), counters: { ...S.counters } };
   },

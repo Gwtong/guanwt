@@ -47,7 +47,8 @@ export async function processMessage(msg) {
 }
 
 // 处理一个发言单元（步骤 ④-⑩）
-async function processUnit(unit, virtualTime) {
+// 返回判定结果：{ verdict:'push'|'hold'|'block'|'skip', reason, product?, outlet? }
+export async function processUnit(unit, virtualTime) {
   state.counters.aggregated++;
   const unitText = unit.texts.join(' ');
   const contextText = getContext(unit, virtualTime);
@@ -58,7 +59,7 @@ async function processUnit(unit, virtualTime) {
   });
   trimLogs();
 
-  // ④ BERT 替身：相关性判定
+  // ④ 相关性判定（BERT 语义层）
   let relevance;
   const useAI = state.config.deepseek_key && state.config.ai_mode === 'builtin';
   if (useAI) {
@@ -69,7 +70,7 @@ async function processUnit(unit, virtualTime) {
       relevance = ruleEngineRelevance(unitText);
     }
   } else {
-    // 无 Key 时用规则引擎替身
+    // 无 Key 时用内置规则引擎
     relevance = ruleEngineRelevance(unitText);
   }
 
@@ -80,7 +81,7 @@ async function processUnit(unit, virtualTime) {
       text: unitText, confidence: relevance.confidence, tau: state.config.tau,
     });
     trimLogs();
-    return;
+    return { verdict: 'block', reason: '相关性不足（置信度低于 τ），静默不响应' };
   }
 
   state.counters.bert_pass++;
@@ -106,7 +107,7 @@ async function processUnit(unit, virtualTime) {
       text: unitText, parsed,
     });
     trimLogs();
-    return;
+    return { verdict: 'block', reason: '吐槽出局（非新需求），不响应' };
   }
 
   // ⑥ 需求去重与频控
@@ -120,8 +121,8 @@ async function processUnit(unit, virtualTime) {
       text: unitText, heat: demand.heat, category: parsed.category,
     });
     trimLogs();
-    // 已响应过的不重复触发
-    if (dupResult.alreadyResponded) return;
+    // 同品重复：艾特场景"必回"（推未推过的候选，见第二课 §5.1）；仅非艾特且已响应才不重复触发
+    if (dupResult.alreadyResponded && !unit.at) return { verdict: 'skip', reason: '同指纹需求 24h 内已响应，去重不重复推' };
   } else {
     demand = createDemand(unit, parsed, virtualTime);
   }
@@ -136,7 +137,7 @@ async function processUnit(unit, virtualTime) {
       text: unitText, reason: freqResult.reason,
     });
     trimLogs();
-    return;
+    return { verdict: 'hold', reason: freqResult.reason };
   }
 
   // ⑦ 分流决策
@@ -158,10 +159,18 @@ async function processUnit(unit, virtualTime) {
       product: execResult.response.product?.name,
       result: execResult.response.result,
     });
+    trimLogs();
+    return {
+      verdict: 'push',
+      outlet: routeDecision.outlet,
+      product: execResult.response.product,
+      reason: execResult.response.result,
+    };
   }
 
   // ⑩ 数据回流（日志已记录，需求状态已更新）
   trimLogs();
+  return { verdict: 'hold', reason: execResult.reason || '未执行响应' };
 }
 
 // 回放结束后强制打包所有窗口

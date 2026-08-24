@@ -18,6 +18,14 @@ export function mockRecommend(groupId, category, keywords, pricePref, excludeSku
     return rankAndReturn(kwMatches, pricePref, groupId);
   }
 
+  // 品类命中后，若话里提到具体商品（如"火鸡面"），优先命中该款（与演示页口径一致）
+  if (keywords.length) {
+    const kwHits = candidates.filter(p =>
+      keywords.some(k => p.name.includes(k)) && !excludeSkus.includes(p.id)
+    );
+    if (kwHits.length > 0) return rankAndReturn(kwHits, pricePref, groupId);
+  }
+
   return rankAndReturn(candidates, pricePref, groupId);
 }
 

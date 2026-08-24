@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   build: {
-    // 由部署流程手动清理 dist，避免构建时删除旧产物被安全策略拦截
+    // 沙箱 safe-delete 会拦截构建时的自动清空，故关闭；部署前需手动 `rm -rf dist` 再 build
     emptyOutDir: false,
   },
   server: {

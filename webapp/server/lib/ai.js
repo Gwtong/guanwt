@@ -1,5 +1,5 @@
 // AI 判定段：直调 DeepSeek API，两段判定
-// 第一段：BERT 替身——相关性判定（分类提示词）
+// 第一段：相关性判定（BERT 语义层）（分类提示词）
 // 第二段：DeepSeek 解析——结构化需求
 // 来自第二课 §4.3 + §8.3
 
@@ -69,7 +69,7 @@ async function callDeepSeek(systemPrompt, userText) {
   }
 }
 
-// 第一段：BERT 替身——相关性判定
+// 第一段：相关性判定（BERT 语义层）
 export async function judgeRelevance(unitText, contextText = '') {
   const userText = `unit_text: ${unitText}\ncontext_text: ${contextText || '(无)'}`;
   const result = await callDeepSeek(BERT_PROMPT, userText);
@@ -101,49 +101,64 @@ export async function testConnection() {
   }
 }
 
-// 无 Key 时的规则引擎替身（让骨架能跑通）
+// 无 Key 时的内置规则引擎（与演示页 demo-wx 同一套词表与判定口径，保证两处结论一致）
 const RULE_MAP = [
-  { cats: ['枣','红枣','大枣','枣子'], cat: '枣' },
-  { cats: ['风扇','电风扇','落地扇','塔扇'], cat: '风扇' },
-  { cats: ['纸巾','抽纸','卷纸'], cat: '纸品' },
-  { cats: ['电饭煲','电饭锅','高压锅'], cat: '厨电' },
-  { cats: ['保温杯','水杯','杯子'], cat: '水杯' },
-  { cats: ['洗衣液','凝珠','洗洁精'], cat: '家清' },
-  { cats: ['被子','凉被','四件套'], cat: '家纺' },
-  { cats: ['手机','老人机','备用机'], cat: '手机' },
-  { cats: ['猫粮','狗粮','猫砂'], cat: '猫粮' },
-  { cats: ['米','大米','长粒香米'], cat: '米面' },
+  { cats: ["枣","红枣","大枣","枣子"], cat: "枣" },
+  { cats: ["风扇","电风扇","落地扇","塔扇"], cat: "风扇" },
+  { cats: ["纸巾","抽纸","卷纸"], cat: "纸品" },
+  { cats: ["电饭煲","电饭锅","高压锅"], cat: "厨电" },
+  { cats: ["保温杯","水杯","杯子","玻璃杯"], cat: "水杯" },
+  { cats: ["洗衣液","凝珠","洗洁精","垃圾袋","洁厕","消毒液","消毒"], cat: "家清" },
+  { cats: ["被子","凉被","四件套","枕头","毛巾","床垫"], cat: "家纺" },
+  { cats: ["手机","老人机","备用机"], cat: "手机" },
+  { cats: ["猫粮","狗粮","猫砂","宠物","宠物零食"], cat: "猫粮" },
+  { cats: ["米","大米","香米","挂面","面条","油","酱油","醋","蚝油","调味"], cat: "米面" },
+  { cats: ["火鸡面","泡面","方便面","辣条","薯片","零食","饼干","坚果","巧克力","糖果","雪饼","猪肉脯"], cat: "零食" },
+  { cats: ["苹果","脐橙","橙子","香蕉","车厘子","蓝莓","猕猴桃","火龙果","水果"], cat: "水果" },
+  { cats: ["可乐","矿泉水","果汁","咖啡","牛奶","酸奶","茶","啤酒","饮料"], cat: "饮料" },
+  { cats: ["水饺","饺子","面包","燕麦","麦片","自热","速食"], cat: "速食" },
+  { cats: ["鸡蛋","鸡胸肉","蔬菜","生鲜","肉"], cat: "生鲜" },
+  { cats: ["炒锅","菜刀","砧板","水壶","保鲜盒","锅","刀","碗","筷"], cat: "厨具" },
+  { cats: ["加湿器","吹风机","扫地","台灯","破壁","家电"], cat: "家电" },
+  { cats: ["收纳","衣架"], cat: "收纳" },
+  { cats: ["浴巾","拖鞋","卫浴"], cat: "卫浴" },
+  { cats: ["耳机","充电宝","数据线","音箱","数码","电脑","平板"], cat: "数码" },
+  { cats: ["T恤","衬衫","卫衣","外套","牛仔裤","运动裤","裙子","运动鞋","帆布鞋","内衣","袜子","帽子","围巾","衣服","裤子","鞋","服饰"], cat: "服饰" },
+  { cats: ["洗发水","沐浴露","牙膏","牙刷","个护"], cat: "个护" },
+  { cats: ["口红","面膜","粉底","美妆","妆"], cat: "美妆" },
+  { cats: ["篮球","瑜伽垫","羽毛球","跳绳","书","笔","笔记本","玩具"], cat: "文体" },
+  { cats: ["维生素","钙片","枸杞","保健","养生"], cat: "保健" }
 ];
 
 const COMPLAINT_MARKERS = ['不好用', '不甜', '不好吃', '坏了', '假货', '差评', '退货'];
 
-export function ruleEngineRelevance(unitText) {
-  const hasProduct = RULE_MAP.some(r => r.cats.some(c => unitText.includes(c)));
-  const hasIntent = /有没有|求推荐|想买|多少钱|有活动|有啥|有吗/.test(unitText);
-  const isComplaint = COMPLAINT_MARKERS.some(m => unitText.includes(m));
+export function ruleEngineRelevance(t) {
+  const hasProduct = RULE_MAP.some(r => r.cats.some(c => t.includes(c)));
+  const hasIntent = /有没有|求推荐|想买|要买|买|下单|多少钱|有活动|有啥|有吗|推荐|哪个好|需要|想要|要/.test(t);
+  const isComplaint = COMPLAINT_MARKERS.some(m => t.includes(m));
   const relevant = hasProduct || hasIntent || isComplaint;
-  return { relevant, confidence: relevant ? 0.85 : 0.2 };
+  return { relevant, confidence: relevant ? 0.85 : 0.2, isComplaint };
 }
 
-export function ruleEngineParse(unitText) {
+export function ruleEngineParse(t) {
   let category = '', keywords = [];
   for (const r of RULE_MAP) {
-    const hits = r.cats.filter(c => unitText.includes(c));
+    const hits = r.cats.filter(c => t.includes(c));
     if (hits.length > 0) { category = r.cat; keywords = hits; break; }
   }
-  const isComplaint = COMPLAINT_MARKERS.some(m => unitText.includes(m));
-  const hasBuyIntent = /想买|求链接|有没有|有啥|有活动|有吗/.test(unitText);
-  const hasRecIntent = /求推荐|推荐|哪个好/.test(unitText);
-  const hasCompare = /比价|便宜|多少钱|划算|贵/.test(unitText);
+  const isComplaint = COMPLAINT_MARKERS.some(m => t.includes(m));
+  const hasBuy = /想买|要买|买点|买|下单|来点|囤点|求链接|有没有|有啥|有活动|有吗/.test(t);
+  const hasRec = /求推荐|推荐|哪个好/.test(t);
+  const hasCompare = /比价|便宜|多少钱|划算|贵|以内/.test(t);
 
   let intent = 'complain';
   if (isComplaint) intent = 'complain';
   else if (hasCompare) intent = 'compare';
-  else if (hasRecIntent) intent = 'ask_rec';
-  else if (hasBuyIntent) intent = 'want_buy';
+  else if (hasRec) intent = 'ask_rec';
+  else if (hasBuy) intent = 'want_buy';
   else if (category) intent = 'ask_rec';
 
-  const priceMatch = unitText.match(/(便宜的|便宜点|百元以内|\d+元以内|性价比)/);
+  const priceMatch = t.match(/(便宜的|便宜点|百元以内|\d+元以内|性价比|以内)/);
   return {
     category: category || '未知',
     keywords,

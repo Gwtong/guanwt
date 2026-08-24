@@ -23,6 +23,7 @@ export default {
     startedAt: null,
     elapsedBase: 0,
   },
+  paused: false,   // 自动聊天流总开关（微信演示页 ↔ 中台 两端同步）
   windows: new Map(),
   demands: [],
   responses: [],
@@ -42,4 +43,5 @@ export default {
     responded: 0,
   },
   logs: [],
+  baseline: [],   // 群上线前指标基线（group_metric_baseline.json）
 };

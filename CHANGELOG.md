@@ -8,6 +8,18 @@
 
 ---
 
+## [2026-08-21] 功能对标补全（F-01~F-29 收口）
+
+- **改了什么**：对照腾讯文档「项目实现工作区」F-01~F-29 逐项收口，补齐群分组 A/B 实验、运营后台登录鉴权、需求池纠错、试点效果看板。
+  - 群分组扩到 100 组（实验组/对照组 50/50，分层与用户类型分布一致），新增 `server/data/group_metric_baseline.json` 作为显著性检验基线（`scripts/gen-mock.mjs` 生成）。
+  - 新增 `/api/dashboard` 返回 `pilot`：`computePilot()` 按臂统计识别量/响应率/采用率/基线率/在线率，做两比例 z 检验输出 `liftPct`、`pValue`、`significant`。
+  - 新增运营后台登录（`OPS_PASSWORD` 环境变量门控，未设置则保持开放、便于面试演示）：`/api/ops/login|logout|auth-status` + 中间件鉴权（`x-ops-token`），公开接口 `/api/ingest*`、`/api/control` 免登录。
+  - 需求池新增「纠错」弹窗，写 `corrected_intent`/`corrected_category`/`note`（`api.updateDemand`），行内展示纠错标签并计数。
+  - `lib/seed.js`：首启自动灌入可信 treatment/control 样本，保证看板首屏即有数据；`/api/replay/reset` 仍清空。
+- **为什么**：使 demo 在面试展示时具备「试点显著性可证、运营可管控、数据可纠偏」的完整闭环，而非纯前端装饰。
+- **影响文件**：`webapp/server/index.js`、`state.js`、`lib/seed.js`(新)、`lib/ai.js`、`lib/pipeline.js`、`lib/recommend.js`、`data/groups.json`、`data/products.json`、`data/group_metric_baseline.json`(新)、`scripts/gen-mock.mjs`(新)、`client/src/App.jsx`、`api/client.js`、`components/Sidebar.jsx`、`DashboardPage.jsx`、`DemandPoolPage.jsx`、`ProductPoolPage.jsx`(新)、`styles/main.css`、`Dockerfile`、`railway.json`、`railway.toml`(删除，合并入 railway.json)、`client/dist/*`(重建)。
+- **部署**：`client/dist` 已重建并提交（不 gitignore），`git push origin main` 触发 Railway 自动部署（rootDirectory=webapp，Dockerfile 构建 server+client/dist）。
+
 ## [2026-08-20] 同步（受控）
 - 来源：SSOT.md §2 策略参数当前值
 - webapp/server/state.js · tau: `0.8` → `0.85`

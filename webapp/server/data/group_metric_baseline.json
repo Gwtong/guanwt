@@ -1,0 +1,602 @@
+[
+  {
+    "id": "G001",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.67,
+    "baseline_demand_count": 10
+  },
+  {
+    "id": "G002",
+    "arm": "实验组",
+    "baseline_click_active_rate": 11.42,
+    "baseline_demand_count": 6
+  },
+  {
+    "id": "G003",
+    "arm": "对照组",
+    "baseline_click_active_rate": 11.15,
+    "baseline_demand_count": 3
+  },
+  {
+    "id": "G004",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.35,
+    "baseline_demand_count": 8
+  },
+  {
+    "id": "G005",
+    "arm": "对照组",
+    "baseline_click_active_rate": 9.29,
+    "baseline_demand_count": 11
+  },
+  {
+    "id": "G006",
+    "arm": "实验组",
+    "baseline_click_active_rate": 11.39,
+    "baseline_demand_count": 3
+  },
+  {
+    "id": "G007",
+    "arm": "对照组",
+    "baseline_click_active_rate": 11.77,
+    "baseline_demand_count": 12
+  },
+  {
+    "id": "G008",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.39,
+    "baseline_demand_count": 9
+  },
+  {
+    "id": "G009",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.5,
+    "baseline_demand_count": 3
+  },
+  {
+    "id": "G010",
+    "arm": "实验组",
+    "baseline_click_active_rate": 10.62,
+    "baseline_demand_count": 7
+  },
+  {
+    "id": "G011",
+    "arm": "实验组",
+    "baseline_click_active_rate": 10.87,
+    "baseline_demand_count": 11
+  },
+  {
+    "id": "G012",
+    "arm": "实验组",
+    "baseline_click_active_rate": 10.22,
+    "baseline_demand_count": 10
+  },
+  {
+    "id": "G013",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.99,
+    "baseline_demand_count": 10
+  },
+  {
+    "id": "G014",
+    "arm": "实验组",
+    "baseline_click_active_rate": 11,
+    "baseline_demand_count": 9
+  },
+  {
+    "id": "G015",
+    "arm": "实验组",
+    "baseline_click_active_rate": 10.51,
+    "baseline_demand_count": 3
+  },
+  {
+    "id": "G016",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.34,
+    "baseline_demand_count": 5
+  },
+  {
+    "id": "G017",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.87,
+    "baseline_demand_count": 3
+  },
+  {
+    "id": "G018",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.41,
+    "baseline_demand_count": 10
+  },
+  {
+    "id": "G019",
+    "arm": "实验组",
+    "baseline_click_active_rate": 11.76,
+    "baseline_demand_count": 11
+  },
+  {
+    "id": "G020",
+    "arm": "实验组",
+    "baseline_click_active_rate": 10.5,
+    "baseline_demand_count": 11
+  },
+  {
+    "id": "G021",
+    "arm": "实验组",
+    "baseline_click_active_rate": 11.65,
+    "baseline_demand_count": 9
+  },
+  {
+    "id": "G022",
+    "arm": "实验组",
+    "baseline_click_active_rate": 10.86,
+    "baseline_demand_count": 8
+  },
+  {
+    "id": "G023",
+    "arm": "实验组",
+    "baseline_click_active_rate": 11.25,
+    "baseline_demand_count": 12
+  },
+  {
+    "id": "G024",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.88,
+    "baseline_demand_count": 5
+  },
+  {
+    "id": "G025",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.9,
+    "baseline_demand_count": 4
+  },
+  {
+    "id": "G026",
+    "arm": "实验组",
+    "baseline_click_active_rate": 11.58,
+    "baseline_demand_count": 4
+  },
+  {
+    "id": "G027",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.3,
+    "baseline_demand_count": 11
+  },
+  {
+    "id": "G028",
+    "arm": "实验组",
+    "baseline_click_active_rate": 10.07,
+    "baseline_demand_count": 8
+  },
+  {
+    "id": "G029",
+    "arm": "实验组",
+    "baseline_click_active_rate": 11.07,
+    "baseline_demand_count": 9
+  },
+  {
+    "id": "G030",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.55,
+    "baseline_demand_count": 9
+  },
+  {
+    "id": "G031",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.67,
+    "baseline_demand_count": 6
+  },
+  {
+    "id": "G032",
+    "arm": "实验组",
+    "baseline_click_active_rate": 11.69,
+    "baseline_demand_count": 12
+  },
+  {
+    "id": "G033",
+    "arm": "实验组",
+    "baseline_click_active_rate": 10.2,
+    "baseline_demand_count": 5
+  },
+  {
+    "id": "G034",
+    "arm": "实验组",
+    "baseline_click_active_rate": 10.04,
+    "baseline_demand_count": 5
+  },
+  {
+    "id": "G035",
+    "arm": "实验组",
+    "baseline_click_active_rate": 11.28,
+    "baseline_demand_count": 4
+  },
+  {
+    "id": "G036",
+    "arm": "实验组",
+    "baseline_click_active_rate": 10.41,
+    "baseline_demand_count": 12
+  },
+  {
+    "id": "G037",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.22,
+    "baseline_demand_count": 7
+  },
+  {
+    "id": "G038",
+    "arm": "实验组",
+    "baseline_click_active_rate": 11.12,
+    "baseline_demand_count": 6
+  },
+  {
+    "id": "G039",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.66,
+    "baseline_demand_count": 8
+  },
+  {
+    "id": "G040",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.67,
+    "baseline_demand_count": 8
+  },
+  {
+    "id": "G041",
+    "arm": "实验组",
+    "baseline_click_active_rate": 11.73,
+    "baseline_demand_count": 3
+  },
+  {
+    "id": "G042",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.63,
+    "baseline_demand_count": 12
+  },
+  {
+    "id": "G043",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.28,
+    "baseline_demand_count": 10
+  },
+  {
+    "id": "G044",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.78,
+    "baseline_demand_count": 3
+  },
+  {
+    "id": "G045",
+    "arm": "实验组",
+    "baseline_click_active_rate": 10.96,
+    "baseline_demand_count": 6
+  },
+  {
+    "id": "G046",
+    "arm": "实验组",
+    "baseline_click_active_rate": 11.16,
+    "baseline_demand_count": 8
+  },
+  {
+    "id": "G047",
+    "arm": "实验组",
+    "baseline_click_active_rate": 10.98,
+    "baseline_demand_count": 9
+  },
+  {
+    "id": "G048",
+    "arm": "实验组",
+    "baseline_click_active_rate": 10.87,
+    "baseline_demand_count": 8
+  },
+  {
+    "id": "G049",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.47,
+    "baseline_demand_count": 7
+  },
+  {
+    "id": "G050",
+    "arm": "实验组",
+    "baseline_click_active_rate": 11.59,
+    "baseline_demand_count": 4
+  },
+  {
+    "id": "G051",
+    "arm": "实验组",
+    "baseline_click_active_rate": 11.22,
+    "baseline_demand_count": 4
+  },
+  {
+    "id": "G052",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.75,
+    "baseline_demand_count": 8
+  },
+  {
+    "id": "G053",
+    "arm": "实验组",
+    "baseline_click_active_rate": 9.43,
+    "baseline_demand_count": 10
+  },
+  {
+    "id": "G054",
+    "arm": "对照组",
+    "baseline_click_active_rate": 11.77,
+    "baseline_demand_count": 7
+  },
+  {
+    "id": "G055",
+    "arm": "对照组",
+    "baseline_click_active_rate": 11.52,
+    "baseline_demand_count": 6
+  },
+  {
+    "id": "G056",
+    "arm": "对照组",
+    "baseline_click_active_rate": 11.58,
+    "baseline_demand_count": 5
+  },
+  {
+    "id": "G057",
+    "arm": "对照组",
+    "baseline_click_active_rate": 11.74,
+    "baseline_demand_count": 12
+  },
+  {
+    "id": "G058",
+    "arm": "对照组",
+    "baseline_click_active_rate": 11.66,
+    "baseline_demand_count": 10
+  },
+  {
+    "id": "G059",
+    "arm": "对照组",
+    "baseline_click_active_rate": 10.3,
+    "baseline_demand_count": 10
+  },
+  {
+    "id": "G060",
+    "arm": "对照组",
+    "baseline_click_active_rate": 11.35,
+    "baseline_demand_count": 3
+  },
+  {
+    "id": "G061",
+    "arm": "对照组",
+    "baseline_click_active_rate": 11.49,
+    "baseline_demand_count": 12
+  },
+  {
+    "id": "G062",
+    "arm": "对照组",
+    "baseline_click_active_rate": 9.55,
+    "baseline_demand_count": 8
+  },
+  {
+    "id": "G063",
+    "arm": "对照组",
+    "baseline_click_active_rate": 9.48,
+    "baseline_demand_count": 5
+  },
+  {
+    "id": "G064",
+    "arm": "对照组",
+    "baseline_click_active_rate": 10.58,
+    "baseline_demand_count": 12
+  },
+  {
+    "id": "G065",
+    "arm": "对照组",
+    "baseline_click_active_rate": 11.45,
+    "baseline_demand_count": 8
+  },
+  {
+    "id": "G066",
+    "arm": "对照组",
+    "baseline_click_active_rate": 9.78,
+    "baseline_demand_count": 7
+  },
+  {
+    "id": "G067",
+    "arm": "对照组",
+    "baseline_click_active_rate": 9.21,
+    "baseline_demand_count": 10
+  },
+  {
+    "id": "G068",
+    "arm": "对照组",
+    "baseline_click_active_rate": 9.99,
+    "baseline_demand_count": 4
+  },
+  {
+    "id": "G069",
+    "arm": "对照组",
+    "baseline_click_active_rate": 10.07,
+    "baseline_demand_count": 12
+  },
+  {
+    "id": "G070",
+    "arm": "对照组",
+    "baseline_click_active_rate": 11.33,
+    "baseline_demand_count": 11
+  },
+  {
+    "id": "G071",
+    "arm": "对照组",
+    "baseline_click_active_rate": 10.37,
+    "baseline_demand_count": 10
+  },
+  {
+    "id": "G072",
+    "arm": "对照组",
+    "baseline_click_active_rate": 10.4,
+    "baseline_demand_count": 11
+  },
+  {
+    "id": "G073",
+    "arm": "对照组",
+    "baseline_click_active_rate": 10.61,
+    "baseline_demand_count": 5
+  },
+  {
+    "id": "G074",
+    "arm": "对照组",
+    "baseline_click_active_rate": 9.21,
+    "baseline_demand_count": 12
+  },
+  {
+    "id": "G075",
+    "arm": "对照组",
+    "baseline_click_active_rate": 9.64,
+    "baseline_demand_count": 12
+  },
+  {
+    "id": "G076",
+    "arm": "对照组",
+    "baseline_click_active_rate": 10.67,
+    "baseline_demand_count": 3
+  },
+  {
+    "id": "G077",
+    "arm": "对照组",
+    "baseline_click_active_rate": 11.01,
+    "baseline_demand_count": 10
+  },
+  {
+    "id": "G078",
+    "arm": "对照组",
+    "baseline_click_active_rate": 10.93,
+    "baseline_demand_count": 12
+  },
+  {
+    "id": "G079",
+    "arm": "对照组",
+    "baseline_click_active_rate": 10.04,
+    "baseline_demand_count": 5
+  },
+  {
+    "id": "G080",
+    "arm": "对照组",
+    "baseline_click_active_rate": 10.9,
+    "baseline_demand_count": 9
+  },
+  {
+    "id": "G081",
+    "arm": "对照组",
+    "baseline_click_active_rate": 10.92,
+    "baseline_demand_count": 10
+  },
+  {
+    "id": "G082",
+    "arm": "对照组",
+    "baseline_click_active_rate": 11.11,
+    "baseline_demand_count": 7
+  },
+  {
+    "id": "G083",
+    "arm": "对照组",
+    "baseline_click_active_rate": 9.24,
+    "baseline_demand_count": 9
+  },
+  {
+    "id": "G084",
+    "arm": "对照组",
+    "baseline_click_active_rate": 10.98,
+    "baseline_demand_count": 4
+  },
+  {
+    "id": "G085",
+    "arm": "对照组",
+    "baseline_click_active_rate": 10.97,
+    "baseline_demand_count": 10
+  },
+  {
+    "id": "G086",
+    "arm": "对照组",
+    "baseline_click_active_rate": 9.73,
+    "baseline_demand_count": 8
+  },
+  {
+    "id": "G087",
+    "arm": "对照组",
+    "baseline_click_active_rate": 10.43,
+    "baseline_demand_count": 5
+  },
+  {
+    "id": "G088",
+    "arm": "对照组",
+    "baseline_click_active_rate": 11.44,
+    "baseline_demand_count": 10
+  },
+  {
+    "id": "G089",
+    "arm": "对照组",
+    "baseline_click_active_rate": 10.22,
+    "baseline_demand_count": 7
+  },
+  {
+    "id": "G090",
+    "arm": "对照组",
+    "baseline_click_active_rate": 9.33,
+    "baseline_demand_count": 4
+  },
+  {
+    "id": "G091",
+    "arm": "对照组",
+    "baseline_click_active_rate": 11.03,
+    "baseline_demand_count": 7
+  },
+  {
+    "id": "G092",
+    "arm": "对照组",
+    "baseline_click_active_rate": 11.1,
+    "baseline_demand_count": 9
+  },
+  {
+    "id": "G093",
+    "arm": "对照组",
+    "baseline_click_active_rate": 9.8,
+    "baseline_demand_count": 3
+  },
+  {
+    "id": "G094",
+    "arm": "对照组",
+    "baseline_click_active_rate": 9.22,
+    "baseline_demand_count": 6
+  },
+  {
+    "id": "G095",
+    "arm": "对照组",
+    "baseline_click_active_rate": 10.22,
+    "baseline_demand_count": 7
+  },
+  {
+    "id": "G096",
+    "arm": "对照组",
+    "baseline_click_active_rate": 10.97,
+    "baseline_demand_count": 10
+  },
+  {
+    "id": "G097",
+    "arm": "对照组",
+    "baseline_click_active_rate": 10.34,
+    "baseline_demand_count": 7
+  },
+  {
+    "id": "G098",
+    "arm": "对照组",
+    "baseline_click_active_rate": 11.64,
+    "baseline_demand_count": 12
+  },
+  {
+    "id": "G099",
+    "arm": "对照组",
+    "baseline_click_active_rate": 9.78,
+    "baseline_demand_count": 7
+  },
+  {
+    "id": "G100",
+    "arm": "对照组",
+    "baseline_click_active_rate": 9.77,
+    "baseline_demand_count": 8
+  }
+]
