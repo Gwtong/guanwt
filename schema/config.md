@@ -1,6 +1,6 @@
 # schema/config.md — 策略配置（运行时锁定参数）
 
-> 锁定文件（AI Coding 流程 ④）。来源：`webapp/server/state.js` 的 `config`
+> 锁定文件。来源：`webapp/server/state.js` 的 `config`
 > 被消费于：全部子 PRD（阈值/窗口/频控/AI 开关）；策略配置页可改
 > 被索引于：`PRD/PRD-主.md` · 关联：`deps/deepseek.md`（AI 配置）
 

@@ -3,12 +3,12 @@
 
 > 权威定义（编号/参数/指标）：[SSOT.md](../SSOT.md) · 变更留痕：[CHANGELOG.md](../CHANGELOG.md)
 
-> 子 PRD（AI Coding 流程 ⑦）。服务业务需求 **R-02**，功能点 **F-02**
+> 子 PRD。服务业务需求 **R-02**，功能点 **F-02**
 > 正向引用：[BRD.md](../BRD.md) §1.5/§3.1 · 反向收录：[PRD-主.md](PRD-主.md) §1
 > 引用：[schema/message.md](../schema/message.md)、[schema/group.md](../schema/group.md)、[schema/config.md](../schema/config.md)、[deps/robot-systems.md](../deps/robot-systems.md)
 
 ## 1. 目标
-以扩展方式**复用现有机器人回传的群消息流**（不新建底层采集），作为需求识别的输入。演示版以"消息回放器"驱动：按虚拟时间戳重放 `messages.json`，支持倍速，模拟真实消息流入。
+以扩展方式**复用现有机器人回传的群消息流**（不新建底层采集），作为需求识别的输入。示例以"消息回放器"驱动：按虚拟时间戳重放 `messages.json`，支持倍速，模拟真实消息流入。
 
 ## 2. 输入
 - `data/messages.json`：`{ t, group, user, text, at }`（见 [schema/message.md](../schema/message.md)）

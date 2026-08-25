@@ -1,6 +1,6 @@
 # schema/response.md — 响应对象（运行时，响应执行产出）
 
-> 锁定文件（AI Coding 流程 ④）。来源：`webapp/server/lib/executor.js` 的 `execute`，存于 `state.responses`
+> 锁定文件。来源：`webapp/server/lib/executor.js` 的 `execute`，存于 `state.responses`
 > 被消费于：PRD-F06（三出口执行）、响应记录页、效果看板
 > 被索引于：`PRD/PRD-主.md` · 关联：`schema/demand.md`、`schema/product.md`、`schema/schedule.md`
 

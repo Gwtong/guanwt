@@ -1,5 +1,4 @@
 // 分流决策：艾特矩阵
-// 来自第二课 §5.3
 // 艾特是消息元数据里的确定性字段，不需要 AI 判断
 
 export function route(demand, relevance) {

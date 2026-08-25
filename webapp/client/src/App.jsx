@@ -120,7 +120,6 @@ export default function App() {
         <header className="header">
           <div className="crumb">管PM · 京东社群快速响应平台 <b>{PAGES[page].title}</b></div>
           <div className="hright">
-            <span className="demo-chip">演示版 DEMO</span>
             <span className="clock">{new Date().toLocaleTimeString('zh-CN', { hour12: false })}</span>
             <div className="user"><div className="av">林</div><span>林运营</span></div>
           </div>

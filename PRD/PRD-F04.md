@@ -3,7 +3,7 @@
 
 > 权威定义（编号/参数/指标）：[SSOT.md](../SSOT.md) · 变更留痕：[CHANGELOG.md](../CHANGELOG.md)
 
-> 子 PRD（AI Coding 流程 ⑦）。服务业务需求 **R-04**，功能点 **F-04**（对应第二课十步 ④相关性判定 + ⑤需求解析）
+> 子 PRD。服务业务需求 **R-04**，功能点 **F-04**（对应十步 相关性判定 + 需求解析）
 > 正向引用：[BRD.md](../BRD.md) §4.1/§3.4 · 反向收录：[PRD-主.md](PRD-主.md) §1/§2
 > 引用：[schema/demand.md](../schema/demand.md)、[schema/config.md](../schema/config.md)、[deps/deepseek.md](../deps/deepseek.md)、[deps/dify.md](../deps/dify.md)
 
@@ -14,11 +14,11 @@
 - 聚合单元 `unitText`（多句拼接）+ `contextText`（回溯上下文）
 
 ## 3. 处理逻辑与规则（双段）
-### ④ 相关性判定（BERT 守门替身）
+###  相关性判定（BERT 守门替身）
 - 返回 `{ relevant: bool, confidence: 0~1 }`。
 - `confidence < tau`（默认 0.85）→ **静默丢弃**（`bert_fail++`），不进解析段（贵的模型不花在无关消息上）。
 
-### ⑤ 需求解析（DeepSeek 解析）
+###  需求解析（DeepSeek 解析）
 - 通过相关性后，解析为 `{ category, keywords, intent, price_pref }`。
 - `intent` 枚举：`want_buy` 想买 / `ask_rec` 求推荐 / `compare` 比价 / `complain` 吐槽。
 - **吐槽出局**：`intent = complain` → 直接出局（吐槽不是购买需求，不响应）。
@@ -42,6 +42,6 @@
 - 异常：无 Key 时规则引擎替身跑通；填 Key 后真 AI 覆盖同一用例。
 
 ## 7. 对应模块 / 数据
-- `webapp/server/lib/ai.js`（判定/解析/降级）、`webapp/server/lib/pipeline.js`（④⑤调度）
+- `webapp/server/lib/ai.js`（判定/解析/降级）、`webapp/server/lib/pipeline.js`（调度）
 - 配置项：`schema/config.md` 的 `tau / ai_mode / deepseek_key / dify_*`
 - 安全要求：Key 仅存后端，前端不回显（策略配置页）

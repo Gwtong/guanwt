@@ -1,7 +1,6 @@
 // AI 判定段：直调 DeepSeek API，两段判定
 // 第一段：相关性判定（BERT 语义层）（分类提示词）
 // 第二段：DeepSeek 解析——结构化需求
-// 来自第二课 §4.3 + §8.3
 
 import state from '../state.js';
 
@@ -101,7 +100,7 @@ export async function testConnection() {
   }
 }
 
-// 无 Key 时的内置规则引擎（与演示页 demo-wx 同一套词表与判定口径，保证两处结论一致）
+// 无 Key 时的内置规则引擎（与内置演示数据同一套词表与判定口径，保证结论一致）
 const RULE_MAP = [
   { cats: ["枣","红枣","大枣","枣子"], cat: "枣" },
   { cats: ["风扇","电风扇","落地扇","塔扇"], cat: "风扇" },

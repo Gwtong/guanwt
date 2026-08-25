@@ -1,5 +1,4 @@
 // 会话式聚合窗：以静默为界，不按固定时长切片
-// 来自第二课 §3.2
 import state from '../state.js';
 
 export function aggregate(msg, virtualTime) {

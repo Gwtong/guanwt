@@ -1,5 +1,4 @@
 // Mock 推荐接口：品类命中 + 简单排序 + 已推品排除
-// 来自第二课 §8.2 —— 入参出参对齐真实契约
 import state from '../state.js';
 
 export function mockRecommend(groupId, category, keywords, pricePref, excludeSkus = []) {

@@ -1,5 +1,4 @@
 // 响应执行：三个出口
-// 来自第二课 §6.2
 import state from '../state.js';
 import { mockRecommend } from './recommend.js';
 

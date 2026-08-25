@@ -1,6 +1,6 @@
 # schema/schedule.md — 排期表（每群每日发品计划）
 
-> 锁定文件（AI Coding 流程 ④）。来源：`webapp/server/data/schedule.json`
+> 锁定文件。来源：`webapp/server/data/schedule.json`
 > 被消费于：PRD-F06（三出口之"排期替换"）、`lib/executor.js`
 > 被索引于：`PRD/PRD-主.md` · 关联：`deps/robot-systems.md`（推送策略管理系统 ≤12 条/群/天）
 

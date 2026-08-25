@@ -1,6 +1,6 @@
 # schema/message.md — 消息回放表（回放器输入）
 
-> 锁定文件（AI Coding 流程 ④）。来源：`webapp/server/data/messages.json`
+> 锁定文件。来源：`webapp/server/data/messages.json`
 > 被消费于：PRD-F02（消息接入）、PRD-F03（前置过滤/聚合），`lib/replay.js` / `lib/filter.js` / `lib/aggregator.js`
 > 被索引于：`PRD/PRD-主.md` · 关联：`deps/robot-systems.md`（真实机器人回传消息流）
 

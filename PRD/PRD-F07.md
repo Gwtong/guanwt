@@ -3,7 +3,7 @@
 
 > 权威定义（编号/参数/指标）：[SSOT.md](../SSOT.md) · 变更留痕：[CHANGELOG.md](../CHANGELOG.md)
 
-> 子 PRD（AI Coding 流程 ⑦）。服务业务需求 **R-07**，功能点 **F-07**（对应第二课十步 ⑥去重频控 + ⑦分流决策）
+> 子 PRD。服务业务需求 **R-07**，功能点 **F-07**（对应十步 去重频控 + 分流决策）
 > 正向引用：[BRD.md](../BRD.md) §3.5 · 反向收录：[PRD-主.md](PRD-主.md) §1/§2
 > 引用：[schema/demand.md](../schema/demand.md)、[schema/config.md](../schema/config.md)
 
@@ -14,15 +14,15 @@
 - `demand`：`fingerprint = 群ID:品类`、`group`、`at`、`status`
 
 ## 3. 处理逻辑与规则
-### 3.1 去重（⑥）
+### 3.1 去重
 - 指纹 `fingerprint = 群ID:归一化品类`。
 - `dedup_window`（默认 24h）内同指纹只算一次：命中则 `heat+1`、更新 `lastSeenAt`，**已 responded 不重复触发**。
 
-### 3.2 频控（⑥）
+### 3.2 频控
 - 非艾特响应每群每日 ≤ `n_freq`（默认 3）次；**艾特响应不占额度**（用户主动呼叫，应即时响应）。
 - 超限 → `demand.status = queued`（排队），不立即响应。
 
-### 3.3 分流决策 · 艾特矩阵（⑦）
+### 3.3 分流决策 · 艾特矩阵
 确定性规则（无需 AI），由消息元数据 `at` + 相关性 `relevant` 决定：
 
 | at | relevant | outlet | 机器人是否主动接话 |

@@ -1,6 +1,6 @@
 # schema/group.md — 群信息表（群主维度主数据）
 
-> 锁定文件（AI Coding 流程 ④）。来源：`webapp/server/data/groups.json`
+> 锁定文件。来源：`webapp/server/data/groups.json`
 > 被消费于：PRD-F01（试点群圈选与 A/B 分组）、PRD-F02（消息接入，按 group 关联）
 > 被索引于：`PRD/PRD-主.md` · 关联：`deps/robot-systems.md`
 
@@ -20,5 +20,5 @@
 - 仅 `whitelist`（见 `schema/config.md`）内的群进入回放/处理；白名单外的群消息直接丢弃（F-02 前置）。
 - `size` 为活跃率分母，须与机器人回传的群人数一致，禁止手工涂改。
 
-## 与第二课关系
+## 与关系
 群主为 C 端个人，非京东运营人员；京东侧只读回传数据，不运营群（"零运营"本质，见 agents.md §0）。

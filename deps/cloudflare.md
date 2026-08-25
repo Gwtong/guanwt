@@ -1,11 +1,11 @@
 # deps/cloudflare.md — 部署与托管（Cloudflare）
 
-> 外部依赖锁定（AI Coding 流程 ⑤）。对应：第二课 §8 演示版部署形态、PRD 部署章节
-> 被消费于：整体部署（前端 Pages + 后端 Workers）、演示版托管
+> 外部依赖锁定。对应：§8 示例部署形态、PRD 部署章节
+> 被消费于：整体部署（前端 Pages + 后端 Workers）、示例托管
 > 被索引于：`PRD/PRD-主.md` · 关联：`techstack.md`
 
 ## 角色
-第二课明确演示版应是"前后端分离的 Web 应用，Cloudflare 部署"。Cloudflare 提供：
+明确示例应是"前后端分离的 Web 应用，Cloudflare 部署"。Cloudflare 提供：
 - **Pages**：托管前端静态产物（Vite build 输出）
 - **Workers**：托管后端 API（Express 适配或 Hono 重写），天然边缘、免运维
 - **Tunnel / R2**：本地联调隧道、静态资源/消息回放文件存储

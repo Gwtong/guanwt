@@ -1,6 +1,6 @@
 # schema/demand.md — 需求对象（运行时，去重后产出）
 
-> 锁定文件（AI Coding 流程 ④）。来源：`webapp/server/lib/dedup.js` 的 `createDemand`，存于 `state.demands`
+> 锁定文件。来源：`webapp/server/lib/dedup.js` 的 `createDemand`，存于 `state.demands`
 > 被消费于：PRD-F04（解析产出）→ PRD-F06（响应执行）、PRD-F07（频控/分流）、需求池页展示
 > 被索引于：`PRD/PRD-主.md` · 关联：`schema/message.md`（原话溯源）、`schema/product.md`（品类同词表）
 

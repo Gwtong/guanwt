@@ -1,0 +1,16 @@
+name = "jd-community-quick-response"
+main = "src/worker.js"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# 前端静态资源 + SPA 回退，由 Cloudflare 直接托管（无需额外 Pages 项目）
+[assets]
+directory = "../webapp/client/dist"
+not_found_handling = "single-page-application"
+
+# —— 环境变量（演示可不设；设 OPS_PASSWORD 后线上需登录运营后台）——
+# 在 Cloudflare 控制台「Settings → Variables and Secrets」里配置，比写在这里更安全。
+# [vars]
+# OPS_PASSWORD = ""
+# DEEPSEEK_API_KEY = ""
+# DIFY_KEY = ""

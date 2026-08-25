@@ -1,6 +1,6 @@
 # schema/product.md — 商品表（商品池快照）
 
-> 锁定文件（AI Coding 流程 ④）。来源：`webapp/server/data/products.json`
+> 锁定文件。来源：`webapp/server/data/products.json`
 > 被消费于：PRD-F05（内容匹配与推荐）、PRD-F06（响应执行取 Top-1）、`lib/recommend.js`
 > 被索引于：`PRD/PRD-主.md` · 关联：`deps/robot-systems.md`（真实商品池与活动系统 ≈6000 商品）
 

@@ -1,6 +1,6 @@
 # deps/robot-systems.md — 真实四系统闭环（本项目挂接边界）
 
-> 外部依赖锁定（AI Coding 流程 ⑤）。对应：第一课 §4.5 现有四系统、BRD §7、PRD-F02/F-05/F-06
+> 外部依赖锁定。对应： §4.5 现有四系统、BRD §7、PRD-F02/F-05/F-06
 > 被消费于：PRD-F02（消息回传接入）、PRD-F05（商品池）、PRD-F06（推送策略执行）
 > 被索引于：`PRD/PRD-主.md` · 关联：`schema/group.md`、`schema/product.md`、`schema/schedule.md`
 

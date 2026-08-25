@@ -1,11 +1,11 @@
-# techstack.md — 技术栈锁定（AI Coding 流程 ⑥）
+# techstack.md — 技术栈锁定
 
 > 本文件锁定语言/框架/库/版本与部署形态，开工前必读（agents.md 哲学一·关键规则）。
-> 依据：第二课 §8 演示版形态（前后端分离 Web 应用）+ 用户确认"React + Express，先本地跑通"。
+> 依据：前后端分离 Web 应用形态 + 用户确认"React + Express，先本地跑通"。
 > 关联：`deps/cloudflare.md`（上线部署）、`PRD/PRD-主.md`
 
 ## 选型原则
-第二课说"选主流"——主流框架训练语料最充分，AI Coding 出错率最低。
+通常说"选主流"——主流框架训练语料最充分， 出错率最低。
 
 ## 前端
 | 项 | 选择 | 说明 |
@@ -25,7 +25,7 @@
 | AI 调用 | `node-fetch` / 原生 `fetch` | 直调 DeepSeek / Dify（见 `deps/deepseek.md`） |
 | 统计 | 自实现 Welch t 检验 | 显著性检验，已用 R 官方数据集验证（见 PRD-F08） |
 
-## 数据层（演示版）
+## 数据层（示例）
 - **Mock 三张表**：`groups.json` / `products.json` / `schedule.json`（见 `schema/`）
 - **消息回放**：`messages.json` 按虚拟时间戳重放（见 `schema/message.md`、PRD-F02）
 - **运行时态**：内存 `state.js`，重启重置（上线须接 KV/D1/DB，见 `deps/cloudflare.md`）

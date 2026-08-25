@@ -3,7 +3,7 @@
 
 > 权威定义（编号/参数/指标）：[SSOT.md](../SSOT.md) · 变更留痕：[CHANGELOG.md](../CHANGELOG.md)
 
-> 子 PRD（AI Coding 流程 ⑦）。服务业务需求 **R-05**，功能点 **F-05**（对应第二课十步 ⑧商品获取）
+> 子 PRD。服务业务需求 **R-05**，功能点 **F-05**（对应十步 商品获取）
 > 正向引用：[BRD.md](../BRD.md) §2.4/§4.5 · 反向收录：[PRD-主.md](PRD-主.md) §1/§2
 > 引用：[schema/product.md](../schema/product.md)、[schema/demand.md](../schema/demand.md)、[deps/robot-systems.md](../deps/robot-systems.md)
 

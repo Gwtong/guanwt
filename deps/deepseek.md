@@ -1,11 +1,11 @@
 # deps/deepseek.md — DeepSeek API（AI 判定段主力）
 
-> 外部依赖锁定（AI Coding 流程 ⑤）。对应：第二课 §4 双模型判定段、PRD-F04
+> 外部依赖锁定。对应：§4 双模型判定段、PRD-F04
 > 被消费于：PRD-F04（相关性判定 + 需求解析，两段调用）
 > 被索引于：`PRD/PRD-主.md` · 关联：`schema/config.md`（deepseek_key 等配置）
 
 ## 角色
-第二课定义"双模型"——贵的模型只花在少量相关消息上。本演示版用 **DeepSeek V4 Flash / deepseek-chat** 单模型承担两段判定（相关性 + 结构化解析），靠提示词区分；真实环境可将相关性判定拆给更便宜的 BERT 守门。
+定义"双模型"——贵的模型只花在少量相关消息上。本示例用 **DeepSeek V4 Flash / deepseek-chat** 单模型承担两段判定（相关性 + 结构化解析），靠提示词区分；真实环境可将相关性判定拆给更便宜的 BERT 守门。
 
 ## 接口契约
 - 地址：`schema/config.md` 的 `deepseek_base`（默认 `https://api.deepseek.com/v1/chat/completions`）

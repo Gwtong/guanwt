@@ -1,0 +1,19 @@
+{
+  "name": "jd-community-quick-response-cloudflare",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "京东社群电商用户需求快速响应平台 —— Cloudflare 部署版（Worker + Assets）",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "verify": "node scripts/verify.mjs"
+  },
+  "dependencies": {
+    "hono": "^4.6.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.99.0",
+    "esbuild": "^0.24.0"
+  }
+}

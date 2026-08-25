@@ -1,5 +1,4 @@
 // 十步主链路：消息从进入到完成响应的完整处理
-// 来自第二课 §2.2
 import state from '../state.js';
 import { preFilter } from './filter.js';
 import { aggregate, checkTimeouts, getContext, flushAll } from './aggregator.js';
@@ -121,7 +120,7 @@ export async function processUnit(unit, virtualTime) {
       text: unitText, heat: demand.heat, category: parsed.category,
     });
     trimLogs();
-    // 同品重复：艾特场景"必回"（推未推过的候选，见第二课 §5.1）；仅非艾特且已响应才不重复触发
+    // 同品重复：艾特场景"必回"（推未推过的候选）；仅非艾特且已响应才不重复触发
     if (dupResult.alreadyResponded && !unit.at) return { verdict: 'skip', reason: '同指纹需求 24h 内已响应，去重不重复推' };
   } else {
     demand = createDemand(unit, parsed, virtualTime);

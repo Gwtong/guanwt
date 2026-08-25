@@ -3,7 +3,7 @@
 
 > 权威定义（编号/参数/指标）：[SSOT.md](../SSOT.md) · 变更留痕：[CHANGELOG.md](../CHANGELOG.md)
 
-> 子 PRD（AI Coding 流程 ⑦）。服务业务需求 **R-08**，功能点 **F-08**（对应第二课十步 ⑩数据回流）
+> 子 PRD。服务业务需求 **R-08**，功能点 **F-08**（对应十步 数据回流）
 > 正向引用：[BRD.md](../BRD.md) §2.2/§4.4 · 反向收录：[PRD-主.md](PRD-主.md) §1/§2
 > 引用：[schema/group.md](../schema/group.md)、[schema/response.md](../schema/response.md)、[schema/config.md](../schema/config.md)、[deps/cloudflare.md](../deps/cloudflare.md)
 
@@ -14,9 +14,9 @@
 - 响应记录 `state.responses`、需求状态、群数据（含 `arm`、`size`）、周点击数据。
 
 ## 3. 处理逻辑与规则
-### 3.1 数据回流（⑩）
+### 3.1 数据回流
 - 每条响应 / 需求状态变更写回 `state`（responses / demands）；计数器 `counters` 累加（intake/filtered/bert_pass/parsed/responded 等）。
-- 演示版为内存态，重启重置（上线须接 KV/D1/DB，见 [deps/cloudflare.md](../deps/cloudflare.md)）。
+- 示例为内存态，重启重置（上线须接 KV/D1/DB，见 [deps/cloudflare.md](../deps/cloudflare.md)）。
 
 ### 3.2 看板指标
 - **管线漏斗**：intake → filtered → bert_pass → parsed → responded（可视化信噪比与转化率）。
